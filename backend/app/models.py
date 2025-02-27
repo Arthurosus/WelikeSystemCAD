@@ -8,5 +8,5 @@ class Company(Base):
     name = Column(String(255), unique=True, index=True, nullable=False)
     db_name = Column(String(255), unique=True, nullable=False)
 
-# Criar as tabelas no banco de dados central
+# Create tables in the central database
 Base.metadata.create_all(bind=engine)

@@ -4,10 +4,10 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
-# Carregar variáveis de ambiente do .env
+# Load environment variables
 load_dotenv()
 
-# Conexão ao banco central (onde ficam os dados das empresas)
+# Database connection
 DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
 
 engine = create_engine(DATABASE_URL)
@@ -15,7 +15,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
-    """Retorna uma sessão com o banco central"""
+    """Returns a session with the central database"""
     db = SessionLocal()
     try:
         yield db
@@ -23,7 +23,7 @@ def get_db():
         db.close()
 
 def get_franchise_db(db_name: str):
-    """Cria uma conexão dinâmica com um banco de franquia específico"""
+    """Creates a dynamic connection to a franchise-specific database"""
     franchise_url = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{db_name}"
     franchise_engine = create_engine(franchise_url)
     FranchiseSession = sessionmaker(autocommit=False, autoflush=False, bind=franchise_engine)

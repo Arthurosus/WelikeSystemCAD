@@ -7,31 +7,31 @@ app = FastAPI()
 
 @app.post("/register_company/")
 def register_company(name: str, db: Session = Depends(get_db)):
-    """Registra uma nova empresa e cria um banco para ela"""
+    """Registers a new company and creates a database for it"""
     company = crud.create_company(db, name)
     
     if not company:
-        raise HTTPException(status_code=400, detail="Empresa já registrada")
+        raise HTTPException(status_code=400, detail="Company already registered")
     
-    return {"message": "Empresa registrada com sucesso!", "company": company.name}
+    return {"message": "Company registered successfully!", "company": company.name}
 
 @app.get("/get_companies/")
 def get_all_companies(db: Session = Depends(get_db)):
-    """Retorna todas as empresas cadastradas no banco central"""
+    """Returns all registered companies from the central database"""
     return db.query(models.Company).all()
 
 @app.get("/get_company_data/{company_name}")
 def get_company_data(company_name: str, db: Session = Depends(get_db)):
-    """Conecta-se ao banco de uma franquia e retorna informações"""
-    
-    # Buscar no banco central o nome real do banco da franquia
+    """Connects to a company's database and returns connection status"""
+
+    # Find the real database name in the central database
     company = db.query(models.Company).filter(models.Company.name == company_name).first()
     
     if not company:
-        raise HTTPException(status_code=404, detail="Empresa não encontrada")
+        raise HTTPException(status_code=404, detail="Company not found")
     
-    # Conectar-se ao banco específico da franquia
+    # Connect to the specific franchise database
     franchise_db = get_franchise_db(company.db_name)
     
-    # Aqui você pode rodar queries dentro do banco específico
-    return {"message": f"Conectado ao banco {company.db_name} com sucesso!"}
+    # You can run queries inside this specific database
+    return {"message": f"Connected to database {company.db_name} successfully!"}
