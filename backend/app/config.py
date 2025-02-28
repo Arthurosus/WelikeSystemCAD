@@ -1,12 +1,10 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    DATABASE_URL_ROOT: str = "mysql+pymysql://root:Rtk3rzJZ8@localhost"
-    DATABASE_URL: str = "mysql+pymysql://root:Rtk3rzJZ8@localhost/master_db"
-
-    JWT_SECRET_KEY: str = "supersecretkey"  # Chave para autenticação JWT
-    JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRATION_MINUTES: int = 60  # Tempo de expiração do token
+    DATABASE_URL: str = "mysql+pymysql://root:Rtk3rzJZ8@localhost"
+    SECRET_KEY: str = "sua_chave_secreta"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     class Config:
         env_file = ".env"
