@@ -1,20 +1,27 @@
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from app.config import settings
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from .database import Base
 
-Base = declarative_base()
+class Company(Base):
+    __tablename__ = "companies"
 
-# Cria a conexão com o banco central
-engine_central = create_engine(settings.database_url)  # Certifique-se de que `database_url` está correto!
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    cnpj = Column(String(18), unique=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    phone = Column(String(20), nullable=False)
+    address = Column(String(255), nullable=False)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_central)
+    users = relationship("User", back_populates="company")
 
-# Exemplo de modelo para a tabela de usuários
+
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(50), unique=True, index=True)
-    email = Column(String(100), unique=True, index=True)
-    hashed_password = Column(String(255))
+    username = Column(String(255), unique=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"))
+
+    company = relationship("Company", back_populates="users")
