@@ -1,23 +1,30 @@
 from sqlalchemy.orm import Session
-from app.models import User, Company
-from passlib.context import CryptContext
+from app import models, schemas
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def get_user(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first()
-
-def create_user(db: Session, username: str, password: str, role: str):
-    hashed_password = pwd_context.hash(password)
-    db_user = User(username=username, password=hashed_password, role=role)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-
-def create_company(db: Session, name: str, cnpj: str, email: str, phone: str, address: str):
-    db_company = Company(name=name, cnpj=cnpj, email=email, phone=phone, address=address)
+def create_company(db: Session, company: schemas.CompanyCreate):
+    db_company = models.Company(
+        name=company.name,
+        cnpj=company.cnpj,
+        email=company.email,
+        sigla=company.sigla,
+        site=company.site,
+        tipo_empresa=company.tipo_empresa,
+        regime_empresarial=company.regime_empresarial,
+        estado_empresa=company.estado_empresa,
+        address=company.address,
+        google_maps_link=company.google_maps_link
+    )
     db.add(db_company)
     db.commit()
     db.refresh(db_company)
+
+    for phone in company.phones:
+        db_phone = models.Phone(company_id=db_company.id, **phone.dict())
+        db.add(db_phone)
+
+    for social in company.social_media:
+        db_social = models.SocialMedia(company_id=db_company.id, **social.dict())
+        db.add(db_social)
+
+    db.commit()
     return db_company
