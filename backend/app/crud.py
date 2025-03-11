@@ -1,25 +1,42 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import text
-from .models import Company
-from .database import engine
+from app.models import Empresa, Telefone, RedesSociais
+from app.schemas import EmpresaCreate
 
-def create_company(db: Session, name: str):
-    """Creates a new company and a separate database for it"""
-    db_name = f"db_{name.lower().replace(' ', '_')}"  # Generates a valid DB name
-    company = Company(name=name, db_name=db_name)
-
-    # Add the company to the central database
-    db.add(company)
+def create_empresa(db: Session, empresa: EmpresaCreate):
+    db_empresa = Empresa(
+        nome=empresa.nome,
+        sigla=empresa.sigla,
+        nome_site=empresa.nome_site,
+        cnpj=empresa.cnpj,
+        email=empresa.email,
+        tipo_empresa=empresa.tipo_empresa,
+        regime_empresarial=empresa.regime_empresarial,
+        estado_empresa=empresa.estado_empresa,
+        endereco=empresa.endereco,
+        formato_endereco=empresa.formato_endereco,
+        link_maps=empresa.link_maps
+    )
+    db.add(db_empresa)
     db.commit()
-    db.refresh(company)
+    db.refresh(db_empresa)
 
-    # Create a database for the company
-    create_franchise_database(db_name)
+    for tel in empresa.telefones:
+        db_tel = Telefone(
+            empresa_id=db_empresa.id,
+            numero=tel.numero,
+            principal=tel.principal,
+            whatsapp=tel.whatsapp
+        )
+        db.add(db_tel)
 
-    return company
+    db_redes = RedesSociais(
+        empresa_id=db_empresa.id,
+        email=empresa.redes_sociais.email,
+        instagram=empresa.redes_sociais.instagram,
+        twitter=empresa.redes_sociais.twitter,
+        tiktok=empresa.redes_sociais.tiktok
+    )
+    db.add(db_redes)
 
-def create_franchise_database(db_name: str):
-    """Creates a new database for the company"""
-    with engine.connect() as connection:
-        connection.execute(text(f"CREATE DATABASE IF NOT EXISTS {db_name};"))
-        connection.commit()
+    db.commit()
+    return db_empresa
