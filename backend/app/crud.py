@@ -1,30 +1,42 @@
 from sqlalchemy.orm import Session
-from app import models, schemas
+from app.models import Empresa, Telefone, RedesSociais
+from app.schemas import EmpresaCreate
 
-def create_company(db: Session, company: schemas.CompanyCreate):
-    db_company = models.Company(
-        name=company.name,
-        cnpj=company.cnpj,
-        email=company.email,
-        sigla=company.sigla,
-        site=company.site,
-        tipo_empresa=company.tipo_empresa,
-        regime_empresarial=company.regime_empresarial,
-        estado_empresa=company.estado_empresa,
-        address=company.address,
-        google_maps_link=company.google_maps_link
+def create_empresa(db: Session, empresa: EmpresaCreate):
+    db_empresa = Empresa(
+        nome=empresa.nome,
+        sigla=empresa.sigla,
+        nome_site=empresa.nome_site,
+        cnpj=empresa.cnpj,
+        email=empresa.email,
+        tipo_empresa=empresa.tipo_empresa,
+        regime_empresarial=empresa.regime_empresarial,
+        estado_empresa=empresa.estado_empresa,
+        endereco=empresa.endereco,
+        formato_endereco=empresa.formato_endereco,
+        link_maps=empresa.link_maps
     )
-    db.add(db_company)
+    db.add(db_empresa)
     db.commit()
-    db.refresh(db_company)
+    db.refresh(db_empresa)
 
-    for phone in company.phones:
-        db_phone = models.Phone(company_id=db_company.id, **phone.dict())
-        db.add(db_phone)
+    for tel in empresa.telefones:
+        db_tel = Telefone(
+            empresa_id=db_empresa.id,
+            numero=tel.numero,
+            principal=tel.principal,
+            whatsapp=tel.whatsapp
+        )
+        db.add(db_tel)
 
-    for social in company.social_media:
-        db_social = models.SocialMedia(company_id=db_company.id, **social.dict())
-        db.add(db_social)
+    db_redes = RedesSociais(
+        empresa_id=db_empresa.id,
+        email=empresa.redes_sociais.email,
+        instagram=empresa.redes_sociais.instagram,
+        twitter=empresa.redes_sociais.twitter,
+        tiktok=empresa.redes_sociais.tiktok
+    )
+    db.add(db_redes)
 
     db.commit()
-    return db_company
+    return db_empresa

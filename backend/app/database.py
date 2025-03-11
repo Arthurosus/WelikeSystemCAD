@@ -17,16 +17,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-def get_franchise_engine(franchise_db_url):
-    """Cria um engine para uma franquia específica."""
-    return create_engine(franchise_db_url, echo=True)
-
-def get_franchise_db(franchise_db_url):
-    """Cria uma sessão de banco de dados para uma franquia específica."""
-    SessionLocalFranchise = sessionmaker(autocommit=False, autoflush=False, bind=get_franchise_engine(franchise_db_url))
-    db = SessionLocalFranchise()
-    try:
-        yield db
-    finally:
-        db.close()

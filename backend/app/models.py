@@ -1,56 +1,60 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from .database import Base
+from app.database import Base
 
-class Company(Base):
-    __tablename__ = "companies"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
-    cnpj = Column(String(18), unique=True, nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
-    sigla = Column(String(50), unique=True, nullable=False)
-    site = Column(String(255), nullable=False)
-    
-    tipo_empresa = Column(String(50), nullable=False)
-    regime_empresarial = Column(String(50), nullable=False)
-    estado_empresa = Column(String(50), nullable=False)
-
-    address = Column(String(500), nullable=False)
-    google_maps_link = Column(String(500), nullable=True)
-
-    users = relationship("User", back_populates="company")
-    phones = relationship("Phone", back_populates="company")
-    social_media = relationship("SocialMedia", back_populates="company")
-
-class User(Base):
-    __tablename__ = "users"
+class Empresa(Base):
+    __tablename__ = "empresas"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(255), unique=True, nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
-    company_id = Column(Integer, ForeignKey("companies.id"))
+    nome = Column(String, nullable=False)
+    sigla = Column(String, nullable=True)
+    nome_site = Column(String, nullable=True)
+    cnpj = Column(String, unique=True, nullable=False)
+    email = Column(String, nullable=True)
+    tipo_empresa = Column(String, ForeignKey("tipo_empresa.nome"))
+    regime_empresarial = Column(String, ForeignKey("regime_empresarial.nome"))
+    estado_empresa = Column(String, ForeignKey("estado_empresa.nome"))
+    endereco = Column(String, nullable=False)
+    formato_endereco = Column(String, nullable=False)  # "br" ou "int"
+    link_maps = Column(String, nullable=True)
 
-    company = relationship("Company", back_populates="users")
+    telefones = relationship("Telefone", back_populates="empresa")
+    redes_sociais = relationship("RedesSociais", back_populates="empresa")
 
-class Phone(Base):
-    __tablename__ = "phones"
+class TipoEmpresa(Base):
+    __tablename__ = "tipo_empresa"
+
+    nome = Column(String, primary_key=True)
+
+class RegimeEmpresarial(Base):
+    __tablename__ = "regime_empresarial"
+
+    nome = Column(String, primary_key=True)
+
+class EstadoEmpresa(Base):
+    __tablename__ = "estado_empresa"
+
+    nome = Column(String, primary_key=True)
+
+class Telefone(Base):
+    __tablename__ = "telefones"
 
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("companies.id"))
-    number = Column(String(20), nullable=False)
-    is_primary = Column(Boolean, default=False)
-    is_whatsapp = Column(Boolean, default=False)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"))
+    numero = Column(String, nullable=False)
+    principal = Column(Boolean, default=False)
+    whatsapp = Column(Boolean, default=False)
 
-    company = relationship("Company", back_populates="phones")
+    empresa = relationship("Empresa", back_populates="telefones")
 
-class SocialMedia(Base):
-    __tablename__ = "social_media"
+class RedesSociais(Base):
+    __tablename__ = "redes_sociais"
 
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("companies.id"))
-    platform = Column(String(50), nullable=False)
-    link = Column(String(500), nullable=False)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"))
+    email = Column(String, nullable=True)
+    instagram = Column(String, nullable=True)
+    twitter = Column(String, nullable=True)
+    tiktok = Column(String, nullable=True)
 
-    company = relationship("Company", back_populates="social_media")
+    empresa = relationship("Empresa", back_populates="redes_sociais")
