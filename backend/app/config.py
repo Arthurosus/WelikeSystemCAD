@@ -8,6 +8,6 @@ class Settings(BaseSettings):
     jwt_algorithm: str
     jwt_expiration_minutes: int
 
-    model_config = ConfigDict(env_file=".env", extra="allow")  # Permite variáveis extras no .env
+    model_config = ConfigDict(env_file=".env", extra="allow")  # Permite carregar .env
 
 settings = Settings()

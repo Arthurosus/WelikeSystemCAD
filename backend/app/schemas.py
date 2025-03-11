@@ -6,53 +6,23 @@ class TelefoneBase(BaseModel):
     principal: bool = False
     whatsapp: bool = False
 
-class TelefoneCreate(TelefoneBase):
-    pass
-
-class Telefone(TelefoneBase):
-    id: int
-    empresa_id: int
-
-    class Config:
-        orm_mode = True
-
 class RedesSociaisBase(BaseModel):
-    email: Optional[str]
-    instagram: Optional[str]
-    twitter: Optional[str]
-    tiktok: Optional[str]
+    email: str
+    instagram: Optional[str] = None
+    twitter: Optional[str] = None
+    tiktok: Optional[str] = None
 
-class RedesSociaisCreate(RedesSociaisBase):
-    pass
-
-class RedesSociais(RedesSociaisBase):
-    id: int
-    empresa_id: int
-
-    class Config:
-        orm_mode = True
-
-class EmpresaBase(BaseModel):
+class EmpresaCreate(BaseModel):
     nome: str
-    sigla: Optional[str]
-    nome_site: Optional[str]
+    sigla: str
+    nome_site: str
     cnpj: str
-    email: Optional[str]
+    email: str
     tipo_empresa: str
     regime_empresarial: str
     estado_empresa: str
     endereco: str
-    formato_endereco: str  # "br" para Brasil, "int" para Internacional
-    link_maps: Optional[str]
-
-class EmpresaCreate(EmpresaBase):
-    telefones: List[TelefoneCreate]
-    redes_sociais: RedesSociaisCreate
-
-class Empresa(EmpresaBase):
-    id: int
-    telefones: List[Telefone]
-    redes_sociais: RedesSociais
-
-    class Config:
-        orm_mode = True
+    formato_endereco: str
+    link_maps: Optional[str] = None
+    telefones: List[TelefoneBase]
+    redes_sociais: RedesSociaisBase
