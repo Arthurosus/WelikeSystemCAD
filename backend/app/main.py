@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas import EmpresaCreate
-from app.crud import create_empresa
+from app.models import Empresa
 
 app = FastAPI()
 
-@app.post("/empresas/")
-def criar_empresa(empresa: EmpresaCreate, db: Session = Depends(get_db)):
-    return create_empresa(db, empresa)
+@app.get("/empresas/")
+def listar_empresas(db: Session = Depends(get_db)):
+    empresas = db.query(Empresa).all()
+    return empresas

@@ -31,3 +31,9 @@ def get_franchise_db(franchise_db_url: str):
         yield db
     finally:
         db.close()
+
+# Certifica-se de que as tabelas estão sendo criadas corretamente no banco central
+def init_db():
+    """Inicializa o banco de dados criando todas as tabelas."""
+    from app import models  # Importa os modelos para garantir que todas as tabelas sejam criadas
+    Base.metadata.create_all(bind=engine_central)
