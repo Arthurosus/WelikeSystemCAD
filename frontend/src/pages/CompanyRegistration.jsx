@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const CompanyRegistration = () => {
   const [formData, setFormData] = useState({
@@ -43,15 +44,37 @@ const CompanyRegistration = () => {
     exibirSite: false,
   });
 
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleEnderecoChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      endereco: { ...formData.endereco, [name]: value },
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/empresas/", formData);
+      setMensagemSucesso("Empresa cadastrada com sucesso!");
+      setTimeout(() => setMensagemSucesso(""), 5000);
+    } catch (error) {
+      console.error("Erro ao cadastrar empresa:", error);
+    }
+  };
+
   return (
     <div className="container">
       <h2>Cadastro de Empresa</h2>
-      <form>
+      {mensagemSucesso && <p style={{ color: "green" }}>{mensagemSucesso}</p>}
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Código:</label>
           <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} />
@@ -76,7 +99,7 @@ const CompanyRegistration = () => {
         <div className="form-group">
           <label>Sigla:</label>
           <input type="text" name="sigla" value={formData.sigla} onChange={handleChange} />
-          <label>Nome do Site:</label>
+          <label>Nome Site:</label>
           <input type="text" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
         </div>
 
@@ -156,27 +179,24 @@ const CompanyRegistration = () => {
             }}
           />{" "}
           Formato Brasil
-          <input type="text" name="cep" placeholder="CEP" value={formData.endereco.cep} onChange={handleChange} />
-          <input type="text" name="rua" placeholder="Rua / Avenida" value={formData.endereco.rua} onChange={handleChange} />
-          <input type="text" name="numero" placeholder="Número" value={formData.endereco.numero} onChange={handleChange} />
-          <input type="text" name="complemento" placeholder="Complemento" value={formData.endereco.complemento} onChange={handleChange} />
-          <input type="text" name="bairro" placeholder="Bairro" value={formData.endereco.bairro} onChange={handleChange} />
-          <input type="text" name="cidade" placeholder="Cidade" value={formData.endereco.cidade} onChange={handleChange} />
-          <input type="text" name="estado" placeholder="Estado" value={formData.endereco.estado} onChange={handleChange} />
-          <input type="text" name="regiao" placeholder="Região" value={formData.endereco.regiao} onChange={handleChange} />
-          <input type="text" name="pais" placeholder="País" value={formData.endereco.pais} onChange={handleChange} />
-          <input type="text" name="latitude" placeholder="Latitude" value={formData.endereco.latitude} onChange={handleChange} />
-          <input type="text" name="longitude" placeholder="Longitude" value={formData.endereco.longitude} onChange={handleChange} />
-          <input type="text" name="linkMaps" placeholder="Link Google Maps" value={formData.endereco.linkMaps} onChange={handleChange} />
-        </div>
 
-        <div className="form-group">
-          <label>Exibir no site?</label>
-          <input
-            type="checkbox"
-            checked={formData.exibirSite}
-            onChange={(e) => setFormData({ ...formData, exibirSite: e.target.checked })}
-          />
+          {formData.endereco.formato === "brasil" ? (
+            <>
+              <input type="text" name="cep" placeholder="CEP" value={formData.endereco.cep} onChange={handleEnderecoChange} />
+              <input type="text" name="rua" placeholder="Rua / Avenida" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+              <input type="text" name="numero" placeholder="Número" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+              <input type="text" name="bairro" placeholder="Bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+              <input type="text" name="cidade" placeholder="Cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
+            </>
+          ) : (
+            <>
+              <input type="text" name="pais" placeholder="País" value={formData.endereco.pais} onChange={handleEnderecoChange} />
+              <input type="text" name="latitude" placeholder="Latitude" value={formData.endereco.latitude} onChange={handleEnderecoChange} />
+              <input type="text" name="longitude" placeholder="Longitude" value={formData.endereco.longitude} onChange={handleEnderecoChange} />
+            </>
+          )}
+
+          <input type="text" name="linkMaps" placeholder="Link Google Maps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
         </div>
 
         <button type="submit">Cadastrar</button>

@@ -5,10 +5,14 @@ const CompanyList = () => {
   const [empresas, setEmpresas] = useState([]);
 
   useEffect(() => {
+    buscarEmpresas();
+  }, []);
+
+  const buscarEmpresas = () => {
     axios.get("http://127.0.0.1:8000/empresas/")
       .then(response => setEmpresas(response.data))
       .catch(error => console.error("Erro ao buscar empresas:", error));
-  }, []);
+  };
 
   return (
     <div className="container">
