@@ -6,10 +6,10 @@ from app.config import settings
 Base = declarative_base()
 
 # Criando o engine para o banco central
-engine_central = create_engine(settings.database_url, echo=True)
+engine = create_engine(settings.database_url, echo=True)
 
 # Criando um SessionLocal para conexões com o banco central
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_central)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db():
     """Obtém uma sessão do banco de dados central."""
@@ -36,4 +36,4 @@ def get_franchise_db(franchise_db_url: str):
 def init_db():
     """Inicializa o banco de dados criando todas as tabelas."""
     from app import models  # Importa os modelos para garantir que todas as tabelas sejam criadas
-    Base.metadata.create_all(bind=engine_central)
+    Base.metadata.create_all(bind=engine)
