@@ -1,16 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal, engine
+from app.database import SessionLocal, engine_central, get_franchise_db
 from app import models
-from app.schemas import EmpresaCreate, EmpresaResponse
+from app.schemas import EmpresaCreate, EmpresaResponse, TipoEmpresaBase, RegimeEmpresarialBase, EstadoEmpresaBase
 
-# Criar tabelas no banco de dados (caso ainda não existam)
-models.Base.metadata.create_all(bind=engine)
+# Criar tabelas no banco de dados central
+models.Base.metadata.create_all(bind=engine_central)
 
-# Inicializa a aplicação FastAPI
 app = FastAPI()
 
-# Dependência para obter a sessão do banco de dados
 def get_db():
     db = SessionLocal()
     try:
@@ -18,34 +16,67 @@ def get_db():
     finally:
         db.close()
 
-# Rota para criar uma nova empresa
+def get_franchise_db_dep(franchise_name: str):
+    return get_franchise_db(franchise_name)
+
+# 🔹 Criar um novo tipo de empresa
+@app.post("/tipos_empresa/")
+def criar_tipo_empresa(tipo: TipoEmpresaBase, db: Session = Depends(get_db)):
+    novo_tipo = models.TipoEmpresa(nome=tipo.nome)
+    db.add(novo_tipo)
+    db.commit()
+    db.refresh(novo_tipo)
+    return novo_tipo
+
+# 🔹 Criar um novo regime empresarial
+@app.post("/regimes_empresariais/")
+def criar_regime_empresarial(regime: RegimeEmpresarialBase, db: Session = Depends(get_db)):
+    novo_regime = models.RegimeEmpresarial(nome=regime.nome)
+    db.add(novo_regime)
+    db.commit()
+    db.refresh(novo_regime)
+    return novo_regime
+
+# 🔹 Criar um novo estado de empresa
+@app.post("/estados_empresa/")
+def criar_estado_empresa(estado: EstadoEmpresaBase, db: Session = Depends(get_db)):
+    novo_estado = models.EstadoEmpresa(nome=estado.nome)
+    db.add(novo_estado)
+    db.commit()
+    db.refresh(novo_estado)
+    return novo_estado
+
+# 🔹 Criar uma nova empresa no **banco central**
 @app.post("/empresas/", response_model=EmpresaResponse)
 def criar_empresa(empresa: EmpresaCreate, db: Session = Depends(get_db)):
-    db_empresa = models.Empresa(
-        codigo=empresa.codigo,
-        cnpj=empresa.cnpj,
-        inscricao_municipal=empresa.inscricao_municipal,
-        inscricao_estadual=empresa.inscricao_estadual,
-        razao_social=empresa.razao_social,
-        nome_fantasia=empresa.nome_fantasia,
-        sigla=empresa.sigla,
-        nome_site=empresa.nome_site,
-        tipo_empresa=empresa.tipo_empresa,
-        regime_empresarial=empresa.regime_empresarial,
-        estado_empresa=empresa.estado_empresa,
-        exibir_site=empresa.exibir_site,
-    )
+    db_empresa = models.Empresa(**empresa.dict())
+    
     db.add(db_empresa)
     db.commit()
     db.refresh(db_empresa)
     return db_empresa
 
-# Rota para listar todas as empresas cadastradas
+# 🔹 Criar uma nova empresa em uma **franquia específica**
+@app.post("/empresas/{franchise_name}/", response_model=EmpresaResponse)
+def criar_empresa_franquia(franchise_name: str, empresa: EmpresaCreate, db: Session = Depends(get_franchise_db_dep)):
+    db_empresa = models.Empresa(**empresa.dict())
+    
+    db.add(db_empresa)
+    db.commit()
+    db.refresh(db_empresa)
+    return db_empresa
+
+# 🔹 Listar todas as empresas do banco **central**
 @app.get("/empresas/", response_model=list[EmpresaResponse])
 def listar_empresas(db: Session = Depends(get_db)):
     return db.query(models.Empresa).all()
 
-# Rota para obter detalhes de uma empresa específica pelo ID
+# 🔹 Listar todas as empresas de uma **franquia específica**
+@app.get("/empresas/{franchise_name}/", response_model=list[EmpresaResponse])
+def listar_empresas_franquia(franchise_name: str, db: Session = Depends(get_franchise_db_dep)):
+    return db.query(models.Empresa).all()
+
+# 🔹 Obter detalhes de uma empresa no banco **central**
 @app.get("/empresas/{empresa_id}", response_model=EmpresaResponse)
 def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
     empresa = db.query(models.Empresa).filter(models.Empresa.id == empresa_id).first()
@@ -53,7 +84,15 @@ def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Empresa não encontrada")
     return empresa
 
-# Rota para excluir uma empresa pelo ID
+# 🔹 Obter detalhes de uma empresa em uma **franquia**
+@app.get("/empresas/{franchise_name}/{empresa_id}", response_model=EmpresaResponse)
+def obter_empresa_franquia(franchise_name: str, empresa_id: int, db: Session = Depends(get_franchise_db_dep)):
+    empresa = db.query(models.Empresa).filter(models.Empresa.id == empresa_id).first()
+    if empresa is None:
+        raise HTTPException(status_code=404, detail="Empresa não encontrada na franquia")
+    return empresa
+
+# 🔹 Excluir uma empresa do banco **central**
 @app.delete("/empresas/{empresa_id}", response_model=dict)
 def deletar_empresa(empresa_id: int, db: Session = Depends(get_db)):
     empresa = db.query(models.Empresa).filter(models.Empresa.id == empresa_id).first()
@@ -64,16 +103,13 @@ def deletar_empresa(empresa_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Empresa deletada com sucesso"}
 
-# Rota para atualizar uma empresa pelo ID
-@app.put("/empresas/{empresa_id}", response_model=EmpresaResponse)
-def atualizar_empresa(empresa_id: int, empresa_update: EmpresaCreate, db: Session = Depends(get_db)):
+# 🔹 Excluir uma empresa de uma **franquia**
+@app.delete("/empresas/{franchise_name}/{empresa_id}", response_model=dict)
+def deletar_empresa_franquia(franchise_name: str, empresa_id: int, db: Session = Depends(get_franchise_db_dep)):
     empresa = db.query(models.Empresa).filter(models.Empresa.id == empresa_id).first()
     if empresa is None:
-        raise HTTPException(status_code=404, detail="Empresa não encontrada")
+        raise HTTPException(status_code=404, detail="Empresa não encontrada na franquia")
     
-    for key, value in empresa_update.model_dump().items():
-        setattr(empresa, key, value)
-    
+    db.delete(empresa)
     db.commit()
-    db.refresh(empresa)
-    return empresa
+    return {"message": "Empresa deletada com sucesso"}

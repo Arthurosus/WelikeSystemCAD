@@ -1,6 +1,15 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
+class TipoEmpresaBase(BaseModel):
+    nome: str
+
+class RegimeEmpresarialBase(BaseModel):
+    nome: str
+
+class EstadoEmpresaBase(BaseModel):
+    nome: str
+
 class EmpresaBase(BaseModel):
     codigo: str
     cnpj: str
@@ -37,8 +46,8 @@ class EnderecoBase(BaseModel):
     estado: Optional[str] = None
     regiao: Optional[str] = None
     pais: Optional[str] = None
-    latitude: Optional[float] = None  # Alterado para float
-    longitude: Optional[float] = None  # Alterado para float
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     link_maps: Optional[str] = None
 
 class EmpresaCreate(EmpresaBase):

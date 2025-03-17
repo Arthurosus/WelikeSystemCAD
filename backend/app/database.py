@@ -5,11 +5,11 @@ from app.config import settings
 
 Base = declarative_base()
 
-# Criando o engine para o banco central
-engine = create_engine(settings.database_url, echo=True)
+# 🔹 Criando engine para o banco central
+engine_central = create_engine(settings.database_url, echo=True)
 
-# Criando um SessionLocal para conexões com o banco central
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# 🔹 Criando um SessionLocal para conexões com o banco central
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_central)
 
 def get_db():
     """Obtém uma sessão do banco de dados central."""
@@ -19,21 +19,27 @@ def get_db():
     finally:
         db.close()
 
-def get_franchise_engine(franchise_db_url: str):
-    """Cria um engine para uma franquia específica."""
-    return create_engine(franchise_db_url, echo=True)
+# 🔹 Função para obter a URL do banco de cada franquia
+def get_franchise_db_url(franchise_name: str) -> str:
+    """Retorna a URL de conexão para o banco de uma franquia."""
+    return f"mysql+pymysql://welike_user:Rtk3rzJZ8@localhost/{franchise_name}"
 
-def get_franchise_db(franchise_db_url: str):
+# 🔹 Criando engine e sessão para franquias específicas
+def get_franchise_engine(franchise_name: str):
+    """Cria um engine para um banco de dados de franquia específica."""
+    return create_engine(get_franchise_db_url(franchise_name), echo=True)
+
+def get_franchise_db(franchise_name: str):
     """Cria uma sessão de banco de dados para uma franquia específica."""
-    SessionLocalFranchise = sessionmaker(autocommit=False, autoflush=False, bind=get_franchise_engine(franchise_db_url))
+    SessionLocalFranchise = sessionmaker(autocommit=False, autoflush=False, bind=get_franchise_engine(franchise_name))
     db = SessionLocalFranchise()
     try:
         yield db
     finally:
         db.close()
 
-# Certifica-se de que as tabelas estão sendo criadas corretamente no banco central
+# 🔹 Inicialização do banco central
 def init_db():
-    """Inicializa o banco de dados criando todas as tabelas."""
-    from app import models  # Importa os modelos para garantir que todas as tabelas sejam criadas
-    Base.metadata.create_all(bind=engine)
+    """Inicializa o banco de dados central, garantindo que as tabelas sejam criadas."""
+    from app import models  
+    Base.metadata.create_all(bind=engine_central)

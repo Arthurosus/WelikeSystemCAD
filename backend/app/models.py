@@ -2,6 +2,23 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
 
+class TipoEmpresa(Base):
+    __tablename__ = "tipos_empresa"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String(50), unique=True, nullable=False)
+
+class RegimeEmpresarial(Base):
+    __tablename__ = "regimes_empresariais"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String(50), unique=True, nullable=False)
+
+class EstadoEmpresa(Base):
+    __tablename__ = "estados_empresa"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String(50), unique=True, nullable=False)
 
 class Empresa(Base):
     __tablename__ = "empresas"
@@ -15,9 +32,16 @@ class Empresa(Base):
     nome_fantasia = Column(String(255))
     sigla = Column(String(10))
     nome_site = Column(String(255))
-    tipo_empresa = Column(String(50), nullable=False)
-    regime_empresarial = Column(String(50), nullable=False)
-    estado_empresa = Column(String(50), nullable=False)
+    
+    tipo_empresa_id = Column(Integer, ForeignKey("tipos_empresa.id"), nullable=False)
+    tipo_empresa = relationship("TipoEmpresa")
+
+    regime_empresarial_id = Column(Integer, ForeignKey("regimes_empresariais.id"), nullable=False)
+    regime_empresarial = relationship("RegimeEmpresarial")
+
+    estado_empresa_id = Column(Integer, ForeignKey("estados_empresa.id"), nullable=False)
+    estado_empresa = relationship("EstadoEmpresa")
+
     exibir_site = Column(Boolean, default=False)
     
     telefones = relationship("Telefone", back_populates="empresa", cascade="all, delete-orphan")
