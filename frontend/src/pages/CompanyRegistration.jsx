@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const CompanyRegistration = () => {
@@ -17,9 +17,9 @@ const CompanyRegistration = () => {
       { numero: "", principal: false, whatsapp: false },
       { numero: "", principal: false, whatsapp: false },
     ],
-    tipoEmpresa: "Própria",
-    regimeEmpresarial: "Simples",
-    estadoEmpresa: "Ativa",
+    tipoEmpresa: "",
+    regimeEmpresarial: "",
+    estadoEmpresa: "",
     redesSociais: {
       email: "",
       instagram: "",
@@ -44,7 +44,16 @@ const CompanyRegistration = () => {
     exibirSite: false,
   });
 
+  const [tiposEmpresa, setTiposEmpresa] = useState([]);
+  const [regimesEmpresariais, setRegimesEmpresariais] = useState([]);
+  const [estadosEmpresa, setEstadosEmpresa] = useState([]);
   const [mensagemSucesso, setMensagemSucesso] = useState("");
+
+  useEffect(() => {
+    axios.get("http://127.0.0.1:8000/tipos_empresa/").then((response) => setTiposEmpresa(response.data));
+    axios.get("http://127.0.0.1:8000/regimes_empresariais/").then((response) => setRegimesEmpresariais(response.data));
+    axios.get("http://127.0.0.1:8000/estados_empresa/").then((response) => setEstadosEmpresa(response.data));
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,7 +71,7 @@ const CompanyRegistration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://127.0.0.1:8000/empresas/", formData);
+      await axios.post("http://127.0.0.1:8000/empresas/", formData);
       setMensagemSucesso("Empresa cadastrada com sucesso!");
       setTimeout(() => setMensagemSucesso(""), 5000);
     } catch (error) {
@@ -101,6 +110,29 @@ const CompanyRegistration = () => {
           <input type="text" name="sigla" value={formData.sigla} onChange={handleChange} />
           <label>Nome Site:</label>
           <input type="text" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
+        </div>
+
+        <div className="form-group">
+          <label>Tipo de Empresa:</label>
+          <select name="tipoEmpresa" value={formData.tipoEmpresa} onChange={handleChange}>
+            {tiposEmpresa.map((tipo) => (
+              <option key={tipo.id} value={tipo.nome}>{tipo.nome}</option>
+            ))}
+          </select>
+
+          <label>Regime Empresarial:</label>
+          <select name="regimeEmpresarial" value={formData.regimeEmpresarial} onChange={handleChange}>
+            {regimesEmpresariais.map((regime) => (
+              <option key={regime.id} value={regime.nome}>{regime.nome}</option>
+            ))}
+          </select>
+
+          <label>Estado da Empresa:</label>
+          <select name="estadoEmpresa" value={formData.estadoEmpresa} onChange={handleChange}>
+            {estadosEmpresa.map((estado) => (
+              <option key={estado.id} value={estado.nome}>{estado.nome}</option>
+            ))}
+          </select>
         </div>
 
         <div className="form-group">
@@ -144,58 +176,12 @@ const CompanyRegistration = () => {
         </div>
 
         <div className="form-group">
-          <label>Redes Sociais:</label>
-          {Object.keys(formData.redesSociais).map((key) => (
-            <div key={key}>
-              <label>{key.charAt(0).toUpperCase() + key.slice(1)}:</label>
-              <input
-                type="text"
-                name={key}
-                value={formData.redesSociais[key]}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    redesSociais: { ...formData.redesSociais, [key]: e.target.value },
-                  });
-                }}
-              />
-            </div>
-          ))}
-        </div>
-
-        <div className="form-group">
           <label>Endereço:</label>
-          <input
-            type="checkbox"
-            checked={formData.endereco.formato === "brasil"}
-            onChange={() => {
-              setFormData({
-                ...formData,
-                endereco: {
-                  ...formData.endereco,
-                  formato: formData.endereco.formato === "brasil" ? "internacional" : "brasil",
-                },
-              });
-            }}
-          />{" "}
-          Formato Brasil
-
-          {formData.endereco.formato === "brasil" ? (
-            <>
-              <input type="text" name="cep" placeholder="CEP" value={formData.endereco.cep} onChange={handleEnderecoChange} />
-              <input type="text" name="rua" placeholder="Rua / Avenida" value={formData.endereco.rua} onChange={handleEnderecoChange} />
-              <input type="text" name="numero" placeholder="Número" value={formData.endereco.numero} onChange={handleEnderecoChange} />
-              <input type="text" name="bairro" placeholder="Bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
-              <input type="text" name="cidade" placeholder="Cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-            </>
-          ) : (
-            <>
-              <input type="text" name="pais" placeholder="País" value={formData.endereco.pais} onChange={handleEnderecoChange} />
-              <input type="text" name="latitude" placeholder="Latitude" value={formData.endereco.latitude} onChange={handleEnderecoChange} />
-              <input type="text" name="longitude" placeholder="Longitude" value={formData.endereco.longitude} onChange={handleEnderecoChange} />
-            </>
-          )}
-
+          <input type="text" name="cep" placeholder="CEP" value={formData.endereco.cep} onChange={handleEnderecoChange} />
+          <input type="text" name="rua" placeholder="Rua / Avenida" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+          <input type="text" name="numero" placeholder="Número" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+          <input type="text" name="bairro" placeholder="Bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+          <input type="text" name="cidade" placeholder="Cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
           <input type="text" name="linkMaps" placeholder="Link Google Maps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
         </div>
 
