@@ -1,14 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
 from app.database import SessionLocal, engine_central, get_franchise_db
-from app import models
-from app.schemas import EmpresaCreate, EmpresaResponse, TipoEmpresaBase, RegimeEmpresarialBase, EstadoEmpresaBase
+from app import models, schemas
 
 # Criar tabelas no banco de dados central
 models.Base.metadata.create_all(bind=engine_central)
 
+# Inicializa a aplicação FastAPI
 app = FastAPI()
 
+# Dependência para obter a sessão do banco central
 def get_db():
     db = SessionLocal()
     try:
@@ -16,68 +18,40 @@ def get_db():
     finally:
         db.close()
 
+# Dependência para obter a sessão de uma franquia específica
 def get_franchise_db_dep(franchise_name: str):
     return get_franchise_db(franchise_name)
 
-# 🔹 Criar um novo tipo de empresa
-@app.post("/tipos_empresa/")
-def criar_tipo_empresa(tipo: TipoEmpresaBase, db: Session = Depends(get_db)):
-    novo_tipo = models.TipoEmpresa(nome=tipo.nome)
-    db.add(novo_tipo)
-    db.commit()
-    db.refresh(novo_tipo)
-    return novo_tipo
-
-# 🔹 Criar um novo regime empresarial
-@app.post("/regimes_empresariais/")
-def criar_regime_empresarial(regime: RegimeEmpresarialBase, db: Session = Depends(get_db)):
-    novo_regime = models.RegimeEmpresarial(nome=regime.nome)
-    db.add(novo_regime)
-    db.commit()
-    db.refresh(novo_regime)
-    return novo_regime
-
-# 🔹 Criar um novo estado de empresa
-@app.post("/estados_empresa/")
-def criar_estado_empresa(estado: EstadoEmpresaBase, db: Session = Depends(get_db)):
-    novo_estado = models.EstadoEmpresa(nome=estado.nome)
-    db.add(novo_estado)
-    db.commit()
-    db.refresh(novo_estado)
-    return novo_estado
-
 # 🔹 Criar uma nova empresa no **banco central**
-@app.post("/empresas/", response_model=EmpresaResponse)
-def criar_empresa(empresa: EmpresaCreate, db: Session = Depends(get_db)):
+@app.post("/empresas/", response_model=schemas.EmpresaResponse)
+def criar_empresa(empresa: schemas.EmpresaCreate, db: Session = Depends(get_db)):
     db_empresa = models.Empresa(**empresa.dict())
-    
     db.add(db_empresa)
     db.commit()
     db.refresh(db_empresa)
     return db_empresa
 
-# 🔹 Criar uma nova empresa em uma **franquia específica**
-@app.post("/empresas/{franchise_name}/", response_model=EmpresaResponse)
-def criar_empresa_franquia(franchise_name: str, empresa: EmpresaCreate, db: Session = Depends(get_franchise_db_dep)):
+# 🔹 Criar uma nova empresa em uma franquia específica
+@app.post("/empresas/{franchise_name}/", response_model=schemas.EmpresaResponse)
+def criar_empresa_franquia(franchise_name: str, empresa: schemas.EmpresaCreate, db: Session = Depends(get_franchise_db_dep)):
     db_empresa = models.Empresa(**empresa.dict())
-    
     db.add(db_empresa)
     db.commit()
     db.refresh(db_empresa)
     return db_empresa
 
 # 🔹 Listar todas as empresas do banco **central**
-@app.get("/empresas/", response_model=list[EmpresaResponse])
+@app.get("/empresas/", response_model=List[schemas.EmpresaResponse])
 def listar_empresas(db: Session = Depends(get_db)):
     return db.query(models.Empresa).all()
 
 # 🔹 Listar todas as empresas de uma **franquia específica**
-@app.get("/empresas/{franchise_name}/", response_model=list[EmpresaResponse])
+@app.get("/empresas/{franchise_name}/", response_model=List[schemas.EmpresaResponse])
 def listar_empresas_franquia(franchise_name: str, db: Session = Depends(get_franchise_db_dep)):
     return db.query(models.Empresa).all()
 
 # 🔹 Obter detalhes de uma empresa no banco **central**
-@app.get("/empresas/{empresa_id}", response_model=EmpresaResponse)
+@app.get("/empresas/{empresa_id}", response_model=schemas.EmpresaResponse)
 def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
     empresa = db.query(models.Empresa).filter(models.Empresa.id == empresa_id).first()
     if empresa is None:
@@ -85,7 +59,7 @@ def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
     return empresa
 
 # 🔹 Obter detalhes de uma empresa em uma **franquia**
-@app.get("/empresas/{franchise_name}/{empresa_id}", response_model=EmpresaResponse)
+@app.get("/empresas/{franchise_name}/{empresa_id}", response_model=schemas.EmpresaResponse)
 def obter_empresa_franquia(franchise_name: str, empresa_id: int, db: Session = Depends(get_franchise_db_dep)):
     empresa = db.query(models.Empresa).filter(models.Empresa.id == empresa_id).first()
     if empresa is None:
@@ -113,3 +87,18 @@ def deletar_empresa_franquia(franchise_name: str, empresa_id: int, db: Session =
     db.delete(empresa)
     db.commit()
     return {"message": "Empresa deletada com sucesso"}
+
+# 🔹 Listar tipos de empresa
+@app.get("/tipos_empresa/")
+def listar_tipos_empresa(db: Session = Depends(get_db)):
+    return db.query(models.TipoEmpresa).all()
+
+# 🔹 Listar regimes empresariais
+@app.get("/regimes_empresariais/")
+def listar_regimes_empresariais(db: Session = Depends(get_db)):
+    return db.query(models.RegimeEmpresarial).all()
+
+# 🔹 Listar estados de empresa
+@app.get("/estados_empresa/")
+def listar_estados_empresa(db: Session = Depends(get_db)):
+    return db.query(models.EstadoEmpresa).all()

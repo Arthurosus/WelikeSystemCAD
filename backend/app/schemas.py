@@ -1,15 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
-class TipoEmpresaBase(BaseModel):
-    nome: str
-
-class RegimeEmpresarialBase(BaseModel):
-    nome: str
-
-class EstadoEmpresaBase(BaseModel):
-    nome: str
-
+# 🔹 Esquemas para Empresa
 class EmpresaBase(BaseModel):
     codigo: str
     cnpj: str
@@ -60,6 +52,45 @@ class EmpresaResponse(EmpresaBase):
     telefones: List[TelefoneBase] = []
     redes_sociais: RedesSociaisBase
     endereco: EnderecoBase
+
+    class Config:
+        from_attributes = True
+
+# 🔹 Esquemas para Tipo de Empresa
+class TipoEmpresaBase(BaseModel):
+    nome: str
+
+class TipoEmpresaCreate(TipoEmpresaBase):
+    pass
+
+class TipoEmpresaResponse(TipoEmpresaBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+# 🔹 Esquemas para Regime Empresarial
+class RegimeEmpresarialBase(BaseModel):
+    nome: str
+
+class RegimeEmpresarialCreate(RegimeEmpresarialBase):
+    pass
+
+class RegimeEmpresarialResponse(RegimeEmpresarialBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+# 🔹 Esquemas para Estado da Empresa
+class EstadoEmpresaBase(BaseModel):
+    nome: str
+
+class EstadoEmpresaCreate(EstadoEmpresaBase):
+    pass
+
+class EstadoEmpresaResponse(EstadoEmpresaBase):
+    id: int
 
     class Config:
         from_attributes = True

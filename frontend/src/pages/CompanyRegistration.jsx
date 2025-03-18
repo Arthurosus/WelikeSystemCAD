@@ -11,15 +11,15 @@ const CompanyRegistration = () => {
     nomeFantasia: "",
     sigla: "",
     nomeSite: "",
+    tipoEmpresa: "",
+    regimeEmpresarial: "",
+    estadoEmpresa: "",
     telefones: [
       { numero: "", principal: false, whatsapp: false },
       { numero: "", principal: false, whatsapp: false },
       { numero: "", principal: false, whatsapp: false },
       { numero: "", principal: false, whatsapp: false },
     ],
-    tipoEmpresa: "",
-    regimeEmpresarial: "",
-    estadoEmpresa: "",
     redesSociais: {
       email: "",
       instagram: "",
@@ -50,9 +50,17 @@ const CompanyRegistration = () => {
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/tipos_empresa/").then((response) => setTiposEmpresa(response.data));
-    axios.get("http://127.0.0.1:8000/regimes_empresariais/").then((response) => setRegimesEmpresariais(response.data));
-    axios.get("http://127.0.0.1:8000/estados_empresa/").then((response) => setEstadosEmpresa(response.data));
+    axios.get("http://127.0.0.1:8000/tipos_empresa/")
+      .then((response) => setTiposEmpresa(response.data))
+      .catch((error) => console.error("Erro ao carregar tipos de empresa:", error));
+
+    axios.get("http://127.0.0.1:8000/regimes_empresariais/")
+      .then((response) => setRegimesEmpresariais(response.data))
+      .catch((error) => console.error("Erro ao carregar regimes empresariais:", error));
+
+    axios.get("http://127.0.0.1:8000/estados_empresa/")
+      .then((response) => setEstadosEmpresa(response.data))
+      .catch((error) => console.error("Erro ao carregar estados da empresa:", error));
   }, []);
 
   const handleChange = (e) => {
@@ -115,6 +123,7 @@ const CompanyRegistration = () => {
         <div className="form-group">
           <label>Tipo de Empresa:</label>
           <select name="tipoEmpresa" value={formData.tipoEmpresa} onChange={handleChange}>
+            <option value="">Selecione...</option>
             {tiposEmpresa.map((tipo) => (
               <option key={tipo.id} value={tipo.nome}>{tipo.nome}</option>
             ))}
@@ -122,6 +131,7 @@ const CompanyRegistration = () => {
 
           <label>Regime Empresarial:</label>
           <select name="regimeEmpresarial" value={formData.regimeEmpresarial} onChange={handleChange}>
+            <option value="">Selecione...</option>
             {regimesEmpresariais.map((regime) => (
               <option key={regime.id} value={regime.nome}>{regime.nome}</option>
             ))}
@@ -129,6 +139,7 @@ const CompanyRegistration = () => {
 
           <label>Estado da Empresa:</label>
           <select name="estadoEmpresa" value={formData.estadoEmpresa} onChange={handleChange}>
+            <option value="">Selecione...</option>
             {estadosEmpresa.map((estado) => (
               <option key={estado.id} value={estado.nome}>{estado.nome}</option>
             ))}
