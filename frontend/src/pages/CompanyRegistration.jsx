@@ -51,14 +51,38 @@ const CompanyRegistration = () => {
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/tipos_empresa/")
+      .then((response) => {
+        console.log("Tipos de Empresa carregados:", response.data);
+        setTiposEmpresa(Array.isArray(response.data) ? response.data : []);
+      })
+      .then((response) => {
+        console.log("Tipos de Empresa:", response.data);
+        setTiposEmpresa(response.data);
+      })
       .then((response) => setTiposEmpresa(response.data))
       .catch((error) => console.error("Erro ao carregar tipos de empresa:", error));
 
     axios.get("http://127.0.0.1:8000/regimes_empresariais/")
+      .then((response) => {
+        console.log("Regimes Empresariais carregados:", response.data);
+        setRegimesEmpresariais(Array.isArray(response.data) ? response.data : []);
+      })
+      .then((response) => {
+        console.log("Regimes Empresariais:", response.data);
+        setRegimesEmpresariais(response.data);
+      })
       .then((response) => setRegimesEmpresariais(response.data))
       .catch((error) => console.error("Erro ao carregar regimes empresariais:", error));
 
     axios.get("http://127.0.0.1:8000/estados_empresa/")
+      .then((response) => {
+        console.log("Estados da Empresa carregados:", response.data);
+        setEstadosEmpresa(Array.isArray(response.data) ? response.data : []);
+      })
+      .then((response) => {
+        console.log("Estados da Empresa:", response.data);
+        setEstadosEmpresa(response.data);
+      })
       .then((response) => setEstadosEmpresa(response.data))
       .catch((error) => console.error("Erro ao carregar estados da empresa:", error));
   }, []);
