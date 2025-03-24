@@ -55,11 +55,6 @@ const CompanyRegistration = () => {
         console.log("Tipos de Empresa carregados:", response.data);
         setTiposEmpresa(Array.isArray(response.data) ? response.data : []);
       })
-      .then((response) => {
-        console.log("Tipos de Empresa:", response.data);
-        setTiposEmpresa(response.data);
-      })
-      .then((response) => setTiposEmpresa(response.data))
       .catch((error) => console.error("Erro ao carregar tipos de empresa:", error));
 
     axios.get("http://127.0.0.1:8000/regimes_empresariais/")
@@ -67,11 +62,6 @@ const CompanyRegistration = () => {
         console.log("Regimes Empresariais carregados:", response.data);
         setRegimesEmpresariais(Array.isArray(response.data) ? response.data : []);
       })
-      .then((response) => {
-        console.log("Regimes Empresariais:", response.data);
-        setRegimesEmpresariais(response.data);
-      })
-      .then((response) => setRegimesEmpresariais(response.data))
       .catch((error) => console.error("Erro ao carregar regimes empresariais:", error));
 
     axios.get("http://127.0.0.1:8000/estados_empresa/")
@@ -79,11 +69,6 @@ const CompanyRegistration = () => {
         console.log("Estados da Empresa carregados:", response.data);
         setEstadosEmpresa(Array.isArray(response.data) ? response.data : []);
       })
-      .then((response) => {
-        console.log("Estados da Empresa:", response.data);
-        setEstadosEmpresa(response.data);
-      })
-      .then((response) => setEstadosEmpresa(response.data))
       .catch((error) => console.error("Erro ao carregar estados da empresa:", error));
   }, []);
 
@@ -98,6 +83,12 @@ const CompanyRegistration = () => {
       ...formData,
       endereco: { ...formData.endereco, [name]: value },
     });
+  };
+
+  const handleTelefoneChange = (index, field, value) => {
+    const novosTelefones = [...formData.telefones];
+    novosTelefones[index][field] = field === "numero" ? value : !novosTelefones[index][field];
+    setFormData({ ...formData, telefones: novosTelefones });
   };
 
   const handleSubmit = async (e) => {
@@ -119,107 +110,81 @@ const CompanyRegistration = () => {
         <div className="form-group">
           <label>Código:</label>
           <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} />
-        </div>
-
-        <div className="form-group">
           <label>CNPJ:</label>
           <input type="text" name="cnpj" value={formData.cnpj} onChange={handleChange} />
           <label>Inscrição Municipal:</label>
           <input type="text" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} />
           <label>Inscrição Estadual:</label>
           <input type="text" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} />
-        </div>
-
-        <div className="form-group">
           <label>Razão Social:</label>
           <input type="text" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
           <label>Nome Fantasia:</label>
           <input type="text" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
-        </div>
-
-        <div className="form-group">
           <label>Sigla:</label>
           <input type="text" name="sigla" value={formData.sigla} onChange={handleChange} />
           <label>Nome Site:</label>
           <input type="text" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
-        </div>
 
-        <div className="form-group">
           <label>Tipo de Empresa:</label>
-          <select name="tipoEmpresa" value={formData.tipoEmpresa} onChange={handleChange}>
+          <select name="tipoEmpresa" value={String(formData.tipoEmpresa)} onChange={handleChange}>
             <option value="">Selecione...</option>
             {tiposEmpresa.map((tipo) => (
-              <option key={tipo.id} value={tipo.nome}>{tipo.nome}</option>
+              <option key={tipo.id} value={String(tipo.id)}>{tipo.nome}</option>
             ))}
           </select>
 
           <label>Regime Empresarial:</label>
-          <select name="regimeEmpresarial" value={formData.regimeEmpresarial} onChange={handleChange}>
+          <select name="regimeEmpresarial" value={String(formData.regimeEmpresarial)} onChange={handleChange}>
             <option value="">Selecione...</option>
             {regimesEmpresariais.map((regime) => (
-              <option key={regime.id} value={regime.nome}>{regime.nome}</option>
+              <option key={regime.id} value={String(regime.id)}>{regime.nome}</option>
             ))}
           </select>
 
           <label>Estado da Empresa:</label>
-          <select name="estadoEmpresa" value={formData.estadoEmpresa} onChange={handleChange}>
+          <select name="estadoEmpresa" value={String(formData.estadoEmpresa)} onChange={handleChange}>
             <option value="">Selecione...</option>
             {estadosEmpresa.map((estado) => (
-              <option key={estado.id} value={estado.nome}>{estado.nome}</option>
+              <option key={estado.id} value={String(estado.id)}>{estado.nome}</option>
             ))}
           </select>
-        </div>
 
-        <div className="form-group">
-          <label>Telefones:</label>
-          {formData.telefones.map((tel, index) => (
-            <div key={index}>
-              <input
-                type="text"
-                placeholder={`Telefone ${index + 1}`}
-                value={tel.numero}
-                onChange={(e) => {
-                  let newTels = [...formData.telefones];
-                  newTels[index].numero = e.target.value;
-                  setFormData({ ...formData, telefones: newTels });
-                }}
-              />
-              <input
-                type="checkbox"
-                checked={tel.principal}
-                disabled={formData.telefones.some((t) => t.principal)}
-                onChange={() => {
-                  let newTels = [...formData.telefones];
-                  newTels.forEach((t) => (t.principal = false));
-                  newTels[index].principal = true;
-                  setFormData({ ...formData, telefones: newTels });
-                }}
-              />{" "}
-              Principal
-              <input
-                type="checkbox"
-                checked={tel.whatsapp}
-                onChange={() => {
-                  let newTels = [...formData.telefones];
-                  newTels[index].whatsapp = !newTels[index].whatsapp;
-                  setFormData({ ...formData, telefones: newTels });
-                }}
-              />{" "}
-              WhatsApp
-            </div>
-          ))}
-        </div>
+          <div>
+            <label>Telefones:</label>
+            {formData.telefones.map((telefone, index) => (
+              <div key={index}>
+                <input
+                  type="text"
+                  placeholder={`Telefone ${index + 1}`}
+                  value={telefone.numero}
+                  onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
+                />
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={telefone.principal}
+                    onChange={() => handleTelefoneChange(index, "principal")}
+                  /> Principal
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={telefone.whatsapp} 
+                    onChange={() => handleTelefoneChange(index, "whatsapp")}
+                  /> WhatsApp
+                </label>
+              </div>
+            ))}
+          </div>
 
-        <div className="form-group">
           <label>Endereço:</label>
-          <input type="text" name="cep" placeholder="CEP" value={formData.endereco.cep} onChange={handleEnderecoChange} />
-          <input type="text" name="rua" placeholder="Rua / Avenida" value={formData.endereco.rua} onChange={handleEnderecoChange} />
-          <input type="text" name="numero" placeholder="Número" value={formData.endereco.numero} onChange={handleEnderecoChange} />
-          <input type="text" name="bairro" placeholder="Bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
-          <input type="text" name="cidade" placeholder="Cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-          <input type="text" name="linkMaps" placeholder="Link Google Maps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
+          <input type="text" placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
+          <input type="text" placeholder="Rua / Avenida" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+          <input type="text" placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+          <input type="text" placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+          <input type="text" placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
+          <input type="text" placeholder="Link Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
         </div>
-
         <button type="submit">Cadastrar</button>
       </form>
     </div>
