@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const CompanyRegistration = () => {
+  const [step, setStep] = useState(1);
+
   const [formData, setFormData] = useState({
     codigo: "",
     cnpj: "",
@@ -15,9 +17,6 @@ const CompanyRegistration = () => {
     regimeEmpresarial: "",
     estadoEmpresa: "",
     telefones: [
-      { numero: "", principal: false, whatsapp: false },
-      { numero: "", principal: false, whatsapp: false },
-      { numero: "", principal: false, whatsapp: false },
       { numero: "", principal: false, whatsapp: false },
     ],
     redesSociais: {
@@ -51,24 +50,15 @@ const CompanyRegistration = () => {
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/tipos_empresa/")
-      .then((response) => {
-        console.log("Tipos de Empresa carregados:", response.data);
-        setTiposEmpresa(Array.isArray(response.data) ? response.data : []);
-      })
+      .then((response) => setTiposEmpresa(response.data || []))
       .catch((error) => console.error("Erro ao carregar tipos de empresa:", error));
 
     axios.get("http://127.0.0.1:8000/regimes_empresariais/")
-      .then((response) => {
-        console.log("Regimes Empresariais carregados:", response.data);
-        setRegimesEmpresariais(Array.isArray(response.data) ? response.data : []);
-      })
+      .then((response) => setRegimesEmpresariais(response.data || []))
       .catch((error) => console.error("Erro ao carregar regimes empresariais:", error));
 
     axios.get("http://127.0.0.1:8000/estados_empresa/")
-      .then((response) => {
-        console.log("Estados da Empresa carregados:", response.data);
-        setEstadosEmpresa(Array.isArray(response.data) ? response.data : []);
-      })
+      .then((response) => setEstadosEmpresa(response.data || []))
       .catch((error) => console.error("Erro ao carregar estados da empresa:", error));
   }, []);
 
@@ -91,6 +81,16 @@ const CompanyRegistration = () => {
     setFormData({ ...formData, telefones: novosTelefones });
   };
 
+  const addTelefone = () => {
+    setFormData({
+      ...formData,
+      telefones: [...formData.telefones, { numero: "", principal: false, whatsapp: false }],
+    });
+  };
+
+  const nextStep = () => setStep((prev) => prev + 1);
+  const prevStep = () => setStep((prev) => prev - 1);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -107,85 +107,89 @@ const CompanyRegistration = () => {
       <h2>Cadastro de Empresa</h2>
       {mensagemSucesso && <p style={{ color: "green" }}>{mensagemSucesso}</p>}
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Código:</label>
-          <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} />
-          <label>CNPJ:</label>
-          <input type="text" name="cnpj" value={formData.cnpj} onChange={handleChange} />
-          <label>Inscrição Municipal:</label>
-          <input type="text" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} />
-          <label>Inscrição Estadual:</label>
-          <input type="text" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} />
-          <label>Razão Social:</label>
-          <input type="text" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
-          <label>Nome Fantasia:</label>
-          <input type="text" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
-          <label>Sigla:</label>
-          <input type="text" name="sigla" value={formData.sigla} onChange={handleChange} />
-          <label>Nome Site:</label>
-          <input type="text" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
+        {step === 1 && (
+          <div className="step step-1">
+            <div className="form-group">
+              <input placeholder="Código" name="codigo" value={formData.codigo} onChange={handleChange} />
+              <input placeholder="Sigla" name="sigla" value={formData.sigla} onChange={handleChange} />
+              <input placeholder="CNPJ" name="cnpj" value={formData.cnpj} onChange={handleChange} />
+              <input placeholder="Inscrição Municipal" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} />
+              <input placeholder="Inscrição Estadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} />
+              <input placeholder="Razão Social" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
+              <input placeholder="Nome Fantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
+              <input placeholder="Nome Site" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
 
-          <label>Tipo de Empresa:</label>
-          <select name="tipoEmpresa" value={String(formData.tipoEmpresa)} onChange={handleChange}>
-            <option value="">Selecione...</option>
-            {tiposEmpresa.map((tipo) => (
-              <option key={tipo.id} value={String(tipo.id)}>{tipo.nome}</option>
-            ))}
-          </select>
+              <label>Tipo de Empresa:</label>
+              <select name="tipoEmpresa" value={String(formData.tipoEmpresa)} onChange={handleChange}>
+                <option value="">Select</option>
+                {tiposEmpresa.map((tipo) => (
+                  <option key={tipo.id} value={String(tipo.id)}>{tipo.nome}</option>
+                ))}
+              </select>
 
-          <label>Regime Empresarial:</label>
-          <select name="regimeEmpresarial" value={String(formData.regimeEmpresarial)} onChange={handleChange}>
-            <option value="">Selecione...</option>
-            {regimesEmpresariais.map((regime) => (
-              <option key={regime.id} value={String(regime.id)}>{regime.nome}</option>
-            ))}
-          </select>
+              <label>Regime Empresarial:</label>
+              <select name="regimeEmpresarial" value={String(formData.regimeEmpresarial)} onChange={handleChange}>
+                <option value="">Select</option>
+                {regimesEmpresariais.map((regime) => (
+                  <option key={regime.id} value={String(regime.id)}>{regime.nome}</option>
+                ))}
+              </select>
 
-          <label>Estado da Empresa:</label>
-          <select name="estadoEmpresa" value={String(formData.estadoEmpresa)} onChange={handleChange}>
-            <option value="">Selecione...</option>
-            {estadosEmpresa.map((estado) => (
-              <option key={estado.id} value={String(estado.id)}>{estado.nome}</option>
-            ))}
-          </select>
-
-          <div>
-            <label>Telefones:</label>
-            {formData.telefones.map((telefone, index) => (
-              <div key={index}>
-                <input
-                  type="text"
-                  placeholder={`Telefone ${index + 1}`}
-                  value={telefone.numero}
-                  onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
-                />
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={telefone.principal}
-                    onChange={() => handleTelefoneChange(index, "principal")}
-                  /> Principal
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={telefone.whatsapp} 
-                    onChange={() => handleTelefoneChange(index, "whatsapp")}
-                  /> WhatsApp
-                </label>
-              </div>
-            ))}
+              <label>Estado da Empresa:</label>
+              <select name="estadoEmpresa" value={String(formData.estadoEmpresa)} onChange={handleChange}>
+                <option value="">Select</option>
+                {estadosEmpresa.map((estado) => (
+                  <option key={estado.id} value={String(estado.id)}>{estado.nome}</option>
+                ))}
+              </select>
+            </div>
           </div>
+        )}
 
-          <label>Endereço:</label>
-          <input type="text" placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
-          <input type="text" placeholder="Rua / Avenida" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
-          <input type="text" placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
-          <input type="text" placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
-          <input type="text" placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-          <input type="text" placeholder="Link Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
+        {step === 2 && (
+          <div className="step step-2">
+            <div className="form-group">
+              <input placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
+              <input placeholder="Rua / Avenida" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+              <input placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+              <input placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+              <input placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
+              <input placeholder="Link Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
+
+              <h4>Telefones:</h4>
+              {formData.telefones.map((tel, index) => (
+                <div key={index}>
+                  <input
+                    placeholder={`Telefone ${index + 1}`}
+                    value={tel.numero}
+                    onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
+                  />
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={tel.principal}
+                      onChange={() => handleTelefoneChange(index, "principal")}
+                    /> Principal
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={tel.whatsapp}
+                      onChange={() => handleTelefoneChange(index, "whatsapp")}
+                    /> WhatsApp
+                  </label>
+                </div>
+              ))}
+              <button type="button" onClick={addTelefone}>Adicionar novo telefone</button>
+            </div>
+          </div>
+        )}
+
+        <div className="step-navigation">
+          {step > 1 && <button type="button" onClick={prevStep}>Voltar</button>}
+          {step < 4 && <button type="button" onClick={nextStep}>Continuar</button>}
+          {step === 4 && <button type="submit">Cadastrar</button>}
         </div>
-        <button type="submit">Cadastrar</button>
       </form>
     </div>
   );
