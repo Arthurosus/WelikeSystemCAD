@@ -109,79 +109,83 @@ const CompanyRegistration = () => {
       <form onSubmit={handleSubmit}>
         {step === 1 && (
           <div className="step step-1">
-            <div className="form-group">
-              <input placeholder="Código" name="codigo" value={formData.codigo} onChange={handleChange} />
-              <input placeholder="Sigla" name="sigla" value={formData.sigla} onChange={handleChange} />
-              <input placeholder="CNPJ" name="cnpj" value={formData.cnpj} onChange={handleChange} />
-              <input placeholder="Inscrição Municipal" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} />
-              <input placeholder="Inscrição Estadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} />
-              <input placeholder="Razão Social" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
-              <input placeholder="Nome Fantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
-              <input placeholder="Nome Site" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
-
-              <label>Tipo de Empresa:</label>
-              <select name="tipoEmpresa" value={String(formData.tipoEmpresa)} onChange={handleChange}>
-                <option value="">Select</option>
-                {tiposEmpresa.map((tipo) => (
-                  <option key={tipo.id} value={String(tipo.id)}>{tipo.nome}</option>
-                ))}
-              </select>
-
-              <label>Regime Empresarial:</label>
-              <select name="regimeEmpresarial" value={String(formData.regimeEmpresarial)} onChange={handleChange}>
-                <option value="">Select</option>
-                {regimesEmpresariais.map((regime) => (
-                  <option key={regime.id} value={String(regime.id)}>{regime.nome}</option>
-                ))}
-              </select>
-
-              <label>Estado da Empresa:</label>
-              <select name="estadoEmpresa" value={String(formData.estadoEmpresa)} onChange={handleChange}>
-                <option value="">Select</option>
-                {estadosEmpresa.map((estado) => (
-                  <option key={estado.id} value={String(estado.id)}>{estado.nome}</option>
-                ))}
-              </select>
-            </div>
+            <input placeholder="Código" name="codigo" value={formData.codigo} onChange={handleChange} />
+            <input placeholder="Sigla" name="sigla" value={formData.sigla} onChange={handleChange} />
+            <input placeholder="CNPJ" name="cnpj" value={formData.cnpj} onChange={handleChange} />
+            <input placeholder="Inscrição Municipal" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} />
+            <input placeholder="Inscrição Estadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} />
+            <input placeholder="Razão Social" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
+            <input placeholder="Nome Fantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
+            <input placeholder="Nome Site" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
+            <select name="tipoEmpresa" value={String(formData.tipoEmpresa)} onChange={handleChange}>
+              <option value="">Tipo de Empresa</option>
+              {tiposEmpresa.map((tipo) => (
+                <option key={tipo.id} value={String(tipo.id)}>{tipo.nome}</option>
+              ))}
+            </select>
+            <select name="regimeEmpresarial" value={String(formData.regimeEmpresarial)} onChange={handleChange}>
+              <option value="">Regime Empresarial</option>
+              {regimesEmpresariais.map((regime) => (
+                <option key={regime.id} value={String(regime.id)}>{regime.nome}</option>
+              ))}
+            </select>
+            <select name="estadoEmpresa" value={String(formData.estadoEmpresa)} onChange={handleChange}>
+              <option value="">Estado da Empresa</option>
+              {estadosEmpresa.map((estado) => (
+                <option key={estado.id} value={String(estado.id)}>{estado.nome}</option>
+              ))}
+            </select>
           </div>
         )}
 
         {step === 2 && (
           <div className="step step-2">
-            <div className="form-group">
-              <input placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
-              <input placeholder="Rua / Avenida" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
-              <input placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
-              <input placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
-              <input placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-              <input placeholder="Link Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
-
-              <h4>Telefones:</h4>
-              {formData.telefones.map((tel, index) => (
-                <div key={index}>
+            <input placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
+            <input placeholder="Rua / Avenida" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+            <input placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+            <input placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+            <input placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
+            <input placeholder="Link Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
+            {formData.telefones.map((tel, index) => (
+              <div key={index}>
+                <input
+                  placeholder={`Telefone ${index + 1}`}
+                  value={tel.numero}
+                  onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
+                />
+                <label>
                   <input
-                    placeholder={`Telefone ${index + 1}`}
-                    value={tel.numero}
-                    onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
-                  />
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={tel.principal}
-                      onChange={() => handleTelefoneChange(index, "principal")}
-                    /> Principal
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={tel.whatsapp}
-                      onChange={() => handleTelefoneChange(index, "whatsapp")}
-                    /> WhatsApp
-                  </label>
-                </div>
-              ))}
-              <button type="button" onClick={addTelefone}>Adicionar novo telefone</button>
-            </div>
+                    type="checkbox"
+                    checked={tel.principal}
+                    onChange={() => handleTelefoneChange(index, "principal")}
+                  /> Principal
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={tel.whatsapp}
+                    onChange={() => handleTelefoneChange(index, "whatsapp")}
+                  /> WhatsApp
+                </label>
+              </div>
+            ))}
+            <button type="button" onClick={addTelefone}>Adicionar novo telefone</button>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="step step-3">
+            <input placeholder="E-mail" name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} />
+            <input placeholder="Instagram" name="instagram" value={formData.redesSociais.instagram} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, instagram: e.target.value } })} />
+            <input placeholder="Twitter" name="twitter" value={formData.redesSociais.twitter} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, twitter: e.target.value } })} />
+            <input placeholder="TikTok" name="tiktok" value={formData.redesSociais.tiktok} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, tiktok: e.target.value } })} />
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="step step-4">
+            <h3>Confirme os dados antes de enviar</h3>
+            <pre>{JSON.stringify(formData, null, 2)}</pre>
           </div>
         )}
 
