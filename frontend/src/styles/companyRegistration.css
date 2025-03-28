@@ -1,118 +1,184 @@
-/* styles/companyRegistration.css */
+/* companyRegistration.css */
+
+/* Reset básico */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9fb;
+}
+
+/* Layout principal */
+.main-layout {
+  display: flex;
+  height: 100vh;
+  background-color: white;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  background-color: #003366;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.logo {
+  width: 120px;
+  margin-bottom: 30px;
+}
+
+.menu {
+  width: 100%;
+  color: white;
+}
+
+.menu-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid #0b4376;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #003366;
+  transition: background-color 0.3s;
+}
+
+.menu-item:hover {
+  background-color: #004080;
+}
+
+/* Conteúdo */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-bar {
+  height: 50px;
+  background-color: #0099cc;
+}
 
 .registration-container {
-    max-width: 1000px;
-    margin: 40px auto;
-    background-color: #fff;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
-    font-family: 'Segoe UI', sans-serif;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-  }
-  
-  .header h2 {
-    font-size: 24px;
-    font-weight: 600;
-  }
-  
-  .progress-bar {
-    display: flex;
-    gap: 4px;
-    flex-grow: 1;
-    margin-left: 40px;
-  }
-  
-  .progress-bar .bar {
-    flex: 1;
-    height: 6px;
-    background-color: #d3d3d3;
-    border-radius: 4px;
-  }
-  
-  .progress-bar .bar.active {
-    background-color: #00a4e3;
-  }
-  
-  .form-step {
-    animation: fadeIn 0.3s ease-in-out;
-  }
-  
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  
-  .input {
-    padding: 10px 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 14px;
-    background-color: #f9f9f9;
-    transition: border-color 0.2s;
-  }
-  
-  .input:focus {
-    border-color: #00a4e3;
-    outline: none;
-    background-color: #fff;
-  }
-  
-  .navigation-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 24px;
-  }
-  
-  .btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-  }
-  
-  .btn.back {
-    background-color: #eee;
-    color: #333;
-  }
-  
-  .btn.continue {
-    background-color: #003366;
-    color: white;
-  }
-  
-  .btn.submit {
-    background-color: #28a745;
-    color: white;
-  }
-  
-  .confirmation-box {
-    background-color: #f1f5f9;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-  }
-  
-  .success-message {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 10px 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-weight: 500;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #f2f4f8;
+}
+
+.form-box {
+  background-color: white;
+  border-radius: 10px;
+  padding: 30px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.step-info {
+  color: #555;
+  font-size: 14px;
+}
+
+.progress-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 4px;
+  background-color: #e0e0e0;
+}
+
+.bar.active {
+  background-color: #0099cc;
+}
+
+.success-message {
+  color: green;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Etapas do formulário */
+.form-step {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+input, select, textarea {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: #f7f8fa;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #0099cc;
+  background-color: white;
+}
+
+/* Botões */
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn.back {
+  background-color: white;
+  color: #003366;
+  border: 1px solid #003366;
+}
+
+.btn.continue {
+  background-color: #003366;
+  color: white;
+}
+
+.btn.submit {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.add-button {
+  background: none;
+  color: #0099cc;
+  border: 1px solid #0099cc;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.add-button:hover {
+  background-color: #e6f7ff;
+}
