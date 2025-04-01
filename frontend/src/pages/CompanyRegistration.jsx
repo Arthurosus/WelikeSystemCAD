@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/companyRegistration.css";
 import logo from "../assets/logo.png";
+import { useNavigate } from "react-router-dom";
 
 const CompanyRegistration = () => {
   const [step, setStep] = useState(1);
+  const navigate = useNavigate();
+  const [cadastroAberto, setCadastroAberto] = useState(false);
+
   const [formData, setFormData] = useState({
     codigo: "",
     cnpj: "",
@@ -17,7 +21,7 @@ const CompanyRegistration = () => {
     tipoEmpresa: "",
     regimeEmpresarial: "",
     estadoEmpresa: "",
-    telefones: [{ numero: "", principal: false, whatsapp: false }],
+    telefones: [{ numero: "", principal: true, whatsapp: false }],
     redesSociais: {
       email: "",
       instagram: "",
@@ -70,10 +74,13 @@ const CompanyRegistration = () => {
   };
 
   const addTelefone = () => {
-    setFormData({
-      ...formData,
-      telefones: [...formData.telefones, { numero: "", principal: false, whatsapp: false }],
-    });
+    const novosTelefones = [...formData.telefones, { numero: "", principal: false, whatsapp: false }];
+    setFormData({ ...formData, telefones: novosTelefones });
+  };
+
+  const removeTelefone = (index) => {
+    const novosTelefones = formData.telefones.filter((_, i) => i !== index);
+    setFormData({ ...formData, telefones: novosTelefones });
   };
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -97,9 +104,14 @@ const CompanyRegistration = () => {
       <aside className="sidebar">
         <img src={logo} alt="Logo Welike" className="logo" />
         <nav className="menu">
-          {Array(6).fill("Texto").map((item, i) => (
-            <div key={i} className="menu-item">{item}</div>
-          ))}
+          <div className="menu-item" onClick={() => setCadastroAberto(!cadastroAberto)}>
+            Cadastros <span className={`arrow ${cadastroAberto ? "open" : "closed"}`}>&#9662;</span>
+          </div>
+          {cadastroAberto && (
+            <div className="submenu">
+              <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
+            </div>
+          )}
         </nav>
       </aside>
 
@@ -107,7 +119,7 @@ const CompanyRegistration = () => {
         <div className="header-bar"></div>
 
         <div className="registration-container">
-          <form className="form-box" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="form-box">
             <div className="form-header">
               <h2>Cadastro de Empresa</h2>
               <span className="step-info">Etapa {step} de 4</span>
@@ -122,67 +134,85 @@ const CompanyRegistration = () => {
             {mensagemSucesso && <p className="success-message">{mensagemSucesso}</p>}
 
             {step === 1 && (
-              <div className="form-step form-grid">
-                <input name="codigo" value={formData.codigo} onChange={handleChange} placeholder="Código" required />
-                <input name="sigla" value={formData.sigla} onChange={handleChange} placeholder="Sigla" required />
-                <input name="cnpj" value={formData.cnpj} onChange={handleChange} placeholder="CNPJ" required />
-                <input name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} placeholder="Inscrição Municipal" />
-                <input name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} placeholder="Inscrição Estadual" />
-                <input name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} placeholder="Razão Social" required />
-                <input name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} placeholder="Nome Fantasia" required />
-                <input name="nomeSite" value={formData.nomeSite} onChange={handleChange} placeholder="Nome Site" />
-                <select name="tipoEmpresa" value={formData.tipoEmpresa} onChange={handleChange} required>
+              <div className="form-step grid">
+                <input className="input" placeholder="Código" name="codigo" value={formData.codigo} onChange={handleChange} />
+                <input className="input" placeholder="Sigla" name="sigla" value={formData.sigla} onChange={handleChange} />
+                <input className="input" placeholder="CNPJ" name="cnpj" value={formData.cnpj} onChange={handleChange} />
+                <input className="input" placeholder="Inscrição Municipal" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} />
+                <input className="input" placeholder="Inscrição Estadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} />
+                <input className="input" placeholder="Razão Social" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} />
+                <input className="input" placeholder="Nome Fantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} />
+                <input className="input" placeholder="Nome Site" name="nomeSite" value={formData.nomeSite} onChange={handleChange} />
+                <select className="input" name="tipoEmpresa" value={formData.tipoEmpresa} onChange={handleChange}>
                   <option value="">Tipo de Empresa</option>
-                  {tiposEmpresa.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                  {tiposEmpresa.map((tipo) => (
+                    <option key={tipo.id} value={tipo.id}>{tipo.nome}</option>
+                  ))}
                 </select>
-                <select name="regimeEmpresarial" value={formData.regimeEmpresarial} onChange={handleChange} required>
+                <select className="input" name="regimeEmpresarial" value={formData.regimeEmpresarial} onChange={handleChange}>
                   <option value="">Regime Empresarial</option>
-                  {regimesEmpresariais.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
+                  {regimesEmpresariais.map((regime) => (
+                    <option key={regime.id} value={regime.id}>{regime.nome}</option>
+                  ))}
                 </select>
-                <select name="estadoEmpresa" value={formData.estadoEmpresa} onChange={handleChange} required>
+                <select className="input" name="estadoEmpresa" value={formData.estadoEmpresa} onChange={handleChange}>
                   <option value="">Estado da Empresa</option>
-                  {estadosEmpresa.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
+                  {estadosEmpresa.map((estado) => (
+                    <option key={estado.id} value={estado.id}>{estado.nome}</option>
+                  ))}
                 </select>
               </div>
             )}
 
             {step === 2 && (
-              <div className="form-step form-grid">
-                <input name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} placeholder="CEP" />
-                <input name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} placeholder="Rua / Avenida" />
-                <input name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} placeholder="Número" />
-                <input name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} placeholder="Bairro" />
-                <input name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} placeholder="Cidade" />
-                <input name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} placeholder="Link Google Maps" />
+              <div className="form-step">
+                <input className="input" placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="Rua" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="E-mail" name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} />
 
-                <input name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} placeholder="E-mail" />
-                {formData.telefones.map((tel, i) => (
-                  <div key={i} className="telefone-box">
-                    <input
-                      placeholder={`Telefone ${i + 1}`}
-                      value={tel.numero}
-                      onChange={(e) => handleTelefoneChange(i, "numero", e.target.value)}
-                    />
-                    <label><input type="checkbox" checked={tel.principal} onChange={() => handleTelefoneChange(i, "principal")} /> Principal</label>
-                    <label><input type="checkbox" checked={tel.whatsapp} onChange={() => handleTelefoneChange(i, "whatsapp")} /> WhatsApp</label>
+                <label className="sub-label">Telefone Principal</label>
+                {formData.telefones.map((tel, index) => (
+                  <div key={index} className="telefone-group">
+                    {index === 1 && <label className="sub-label">Telefones Secundários</label>}
+                    <div className="telefone-inputs">
+                      <input
+                        type="text"
+                        value={tel.numero}
+                        onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
+                        placeholder="(00) 91234-5678"
+                      />
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={tel.whatsapp}
+                          onChange={() => handleTelefoneChange(index, "whatsapp")}
+                        /> WhatsApp
+                      </label>
+                      {index > 0 && (
+                        <button type="button" onClick={() => removeTelefone(index)} className="remove-btn">X</button>
+                      )}
+                    </div>
                   </div>
                 ))}
-                <button type="button" onClick={addTelefone} className="btn secondary">Adicionar novo telefone</button>
+                <button type="button" onClick={addTelefone} className="add-btn">Adicionar novo telefone</button>
               </div>
             )}
 
             {step === 3 && (
-              <div className="form-step form-grid">
-                <input name="instagram" value={formData.redesSociais.instagram} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, instagram: e.target.value } })} placeholder="Instagram" />
-                <input name="twitter" value={formData.redesSociais.twitter} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, twitter: e.target.value } })} placeholder="Twitter" />
-                <input name="tiktok" value={formData.redesSociais.tiktok} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, tiktok: e.target.value } })} placeholder="TikTok" />
+              <div className="form-step">
+                <input className="input" placeholder="Instagram" value={formData.redesSociais.instagram} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, instagram: e.target.value } })} />
+                <input className="input" placeholder="Twitter" value={formData.redesSociais.twitter} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, twitter: e.target.value } })} />
+                <input className="input" placeholder="TikTok" value={formData.redesSociais.tiktok} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, tiktok: e.target.value } })} />
               </div>
             )}
 
             {step === 4 && (
               <div className="form-step">
                 <h3>Confirme os dados antes de enviar:</h3>
-                <pre className="json-preview">{JSON.stringify(formData, null, 2)}</pre>
+                <pre>{JSON.stringify(formData, null, 2)}</pre>
               </div>
             )}
 
