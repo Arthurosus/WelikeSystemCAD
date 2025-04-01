@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/companyRegistration.css";
 import logo from "../assets/logo.png";
+import { useNavigate } from "react-router-dom";
 
 const CompanyRegistration = () => {
   const [step, setStep] = useState(1);
+  const navigate = useNavigate();
+  const [cadastroAberto, setCadastroAberto] = useState(false);
+
   const [formData, setFormData] = useState({
     codigo: "",
     cnpj: "",
@@ -100,9 +104,14 @@ const CompanyRegistration = () => {
       <aside className="sidebar">
         <img src={logo} alt="Logo Welike" className="logo" />
         <nav className="menu">
-          {Array(6).fill("Texto").map((item, i) => (
-            <div key={i} className="menu-item">{item}</div>
-          ))}
+          <div className="menu-item" onClick={() => setCadastroAberto(!cadastroAberto)}>
+            Cadastros <span className={`arrow ${cadastroAberto ? "open" : "closed"}`}>&#9662;</span>
+          </div>
+          {cadastroAberto && (
+            <div className="submenu">
+              <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
+            </div>
+          )}
         </nav>
       </aside>
 
