@@ -38,42 +38,50 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
+  position: relative;
 }
 
 .menu-item:hover {
   background-color: #0060bf;
 }
 
-.submenu {
-  display: none;
-  flex-direction: column;
-  background-color: #004c97;
-  width: 100%;
-}
-
-.submenu.visible {
-  display: flex;
-}
-
-.submenu-item {
-  padding: 0.75rem 2rem;
-  cursor: pointer;
-  color: white;
-  font-weight: 400;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.submenu-item:hover {
-  background-color: #0060bf;
-}
-
 .arrow {
   float: right;
+  margin-right: 1rem;
   transition: transform 0.3s ease;
 }
 
 .arrow.open {
   transform: rotate(180deg);
+}
+
+.submenu {
+  background-color: #005eb8;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.submenu.visible {
+  max-height: 200px;
+  opacity: 1;
+  padding-left: 2.5rem;
+}
+
+.submenu.hidden {
+  max-height: 0;
+  opacity: 0;
+  padding-left: 2.5rem;
+}
+
+.submenu-item {
+  padding: 0.75rem;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.2s;
+}
+
+.submenu-item:hover {
+  background-color: #0075cc;
 }
 
 .content {
