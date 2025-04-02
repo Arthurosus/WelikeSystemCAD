@@ -107,9 +107,11 @@ const CompanyRegistration = () => {
           <div className="menu-item" onClick={() => setCadastroAberto(!cadastroAberto)}>
             Cadastros <span className={`arrow ${cadastroAberto ? "open" : "closed"}`}>&#9662;</span>
           </div>
-          <div className={`submenu ${cadastroAberto ? "visible" : "hidden"}`}>
-            <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
-          </div>
+          {cadastroAberto && (
+            <div className="submenu visible">
+              <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
+            </div>
+          )}
         </nav>
       </aside>
 
@@ -173,24 +175,14 @@ const CompanyRegistration = () => {
                 <input className="input" placeholder="Estado" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} />
                 <input className="input" placeholder="País" name="pais" value={formData.endereco.pais} onChange={handleEnderecoChange} />
                 <input className="input" placeholder="Link do Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
-
                 <label className="sub-label">Telefone Principal</label>
                 {formData.telefones.map((tel, index) => (
                   <div key={index} className="telefone-group">
                     {index === 1 && <label className="sub-label">Telefones Secundários</label>}
                     <div className="telefone-inputs">
-                      <input
-                        type="text"
-                        value={tel.numero}
-                        onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
-                        placeholder="(00) 91234-5678"
-                      />
+                      <input type="text" value={tel.numero} onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)} placeholder="(00) 91234-5678" />
                       <label>
-                        <input
-                          type="checkbox"
-                          checked={tel.whatsapp}
-                          onChange={() => handleTelefoneChange(index, "whatsapp")}
-                        /> WhatsApp
+                        <input type="checkbox" checked={tel.whatsapp} onChange={() => handleTelefoneChange(index, "whatsapp")} /> WhatsApp
                       </label>
                       {index > 0 && (
                         <button type="button" onClick={() => removeTelefone(index)} className="remove-btn">X</button>
@@ -204,6 +196,7 @@ const CompanyRegistration = () => {
 
             {step === 3 && (
               <div className="form-step">
+                <h3>Redes Sociais</h3>
                 <input className="input" placeholder="E-mail" name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} />
                 <input className="input" placeholder="Instagram" value={formData.redesSociais.instagram} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, instagram: e.target.value } })} />
                 <input className="input" placeholder="Twitter" value={formData.redesSociais.twitter} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, twitter: e.target.value } })} />
@@ -212,9 +205,17 @@ const CompanyRegistration = () => {
             )}
 
             {step === 4 && (
-              <div className="form-step">
+              <div className="form-step confirmation">
                 <h3>Confirme os dados antes de enviar:</h3>
-                <pre>{JSON.stringify(formData, null, 2)}</pre>
+                <div className="confirmation-grid">
+                  <div><strong>Razão Social:</strong> {formData.razaoSocial}</div>
+                  <div><strong>CNPJ:</strong> {formData.cnpj}</div>
+                  <div><strong>Inscrição Municipal:</strong> {formData.inscricaoMunicipal}</div>
+                  <div><strong>Inscrição Estadual:</strong> {formData.inscricaoEstadual}</div>
+                  <div><strong>Endereço:</strong> {`${formData.endereco.rua}, ${formData.endereco.numero} - ${formData.endereco.bairro}, ${formData.endereco.cidade}/${formData.endereco.estado}`}</div>
+                  <div><strong>Telefone Principal:</strong> {formData.telefones[0]?.numero}</div>
+                  <div><strong>Email:</strong> {formData.redesSociais.email}</div>
+                </div>
               </div>
             )}
 
