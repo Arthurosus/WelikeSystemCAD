@@ -107,11 +107,9 @@ const CompanyRegistration = () => {
           <div className="menu-item" onClick={() => setCadastroAberto(!cadastroAberto)}>
             Cadastros <span className={`arrow ${cadastroAberto ? "open" : "closed"}`}>&#9662;</span>
           </div>
-          {cadastroAberto && (
-            <div className="submenu">
-              <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
-            </div>
-          )}
+          <div className={`submenu ${cadastroAberto ? "visible" : "hidden"}`}>
+            <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
+          </div>
         </nav>
       </aside>
 
@@ -169,9 +167,12 @@ const CompanyRegistration = () => {
                 <input className="input" placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
                 <input className="input" placeholder="Rua" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
                 <input className="input" placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="Complemento" name="complemento" value={formData.endereco.complemento} onChange={handleEnderecoChange} />
                 <input className="input" placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
                 <input className="input" placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="E-mail" name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} />
+                <input className="input" placeholder="Estado" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="País" name="pais" value={formData.endereco.pais} onChange={handleEnderecoChange} />
+                <input className="input" placeholder="Link do Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
 
                 <label className="sub-label">Telefone Principal</label>
                 {formData.telefones.map((tel, index) => (
@@ -203,6 +204,7 @@ const CompanyRegistration = () => {
 
             {step === 3 && (
               <div className="form-step">
+                <input className="input" placeholder="E-mail" name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} />
                 <input className="input" placeholder="Instagram" value={formData.redesSociais.instagram} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, instagram: e.target.value } })} />
                 <input className="input" placeholder="Twitter" value={formData.redesSociais.twitter} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, twitter: e.target.value } })} />
                 <input className="input" placeholder="TikTok" value={formData.redesSociais.tiktok} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, tiktok: e.target.value } })} />

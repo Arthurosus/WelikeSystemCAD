@@ -38,44 +38,42 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .menu-item:hover {
   background-color: #0060bf;
 }
 
-.arrow {
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
-  transition: transform 0.2s ease;
-}
-
-.arrow.open {
-  transform: rotate(180deg);
-}
-
 .submenu {
-  background-color: #005ca9;
   display: none;
   flex-direction: column;
+  background-color: #004c97;
+  width: 100%;
 }
 
-.submenu.open {
+.submenu.visible {
   display: flex;
 }
 
 .submenu-item {
-  padding: 0.75rem 2.5rem;
-  font-size: 0.9rem;
+  padding: 0.75rem 2rem;
   cursor: pointer;
-  transition: background 0.2s;
+  color: white;
+  font-weight: 400;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .submenu-item:hover {
-  background-color: #0070cc;
+  background-color: #0060bf;
+}
+
+.arrow {
+  float: right;
+  transition: transform 0.3s ease;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
 }
 
 .content {
@@ -244,13 +242,4 @@ body {
 
 .add-btn:hover {
   background-color: #e6f9ff;
-}
-
-.rede-input {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: #f2f5f9;
-  width: 100%;
 }
