@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/companyRegistration.css";
-import logo from "../assets/logo.png";
+import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 
 const CompanyRegistration = () => {
@@ -101,30 +101,15 @@ const CompanyRegistration = () => {
 
   return (
     <div className="main-layout">
-      <aside className="sidebar">
-        <img src={logo} alt="Logo Welike" className="logo" />
-        <nav className="menu">
-          <div className="menu-item" onClick={() => setCadastroAberto(!cadastroAberto)}>
-            Cadastros <span className={`arrow ${cadastroAberto ? "open" : "closed"}`}>&#9662;</span>
-          </div>
-          {cadastroAberto && (
-            <div className="submenu visible">
-              <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
-            </div>
-          )}
-        </nav>
-      </aside>
-
+      <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
       <div className="content">
         <div className="header-bar"></div>
-
         <div className="registration-container">
           <form onSubmit={handleSubmit} className="form-box">
             <div className="form-header">
               <h2>Cadastro de Empresa</h2>
               <span className="step-info">Etapa {step} de 4</span>
             </div>
-
             <div className="progress-bar">
               {steps.map((_, index) => (
                 <div key={index} className={`bar ${step - 1 >= index ? "active" : ""}`}></div>
@@ -184,9 +169,7 @@ const CompanyRegistration = () => {
                       <label>
                         <input type="checkbox" checked={tel.whatsapp} onChange={() => handleTelefoneChange(index, "whatsapp")} /> WhatsApp
                       </label>
-                      {index > 0 && (
-                        <button type="button" onClick={() => removeTelefone(index)} className="remove-btn">X</button>
-                      )}
+                      {index > 0 && (<button type="button" onClick={() => removeTelefone(index)} className="remove-btn">X</button>)}
                     </div>
                   </div>
                 ))}
@@ -196,7 +179,6 @@ const CompanyRegistration = () => {
 
             {step === 3 && (
               <div className="form-step">
-                <h3>Redes Sociais</h3>
                 <input className="input" placeholder="E-mail" name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} />
                 <input className="input" placeholder="Instagram" value={formData.redesSociais.instagram} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, instagram: e.target.value } })} />
                 <input className="input" placeholder="Twitter" value={formData.redesSociais.twitter} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, twitter: e.target.value } })} />
@@ -205,16 +187,51 @@ const CompanyRegistration = () => {
             )}
 
             {step === 4 && (
-              <div className="form-step confirmation">
-                <h3>Confirme os dados antes de enviar:</h3>
-                <div className="confirmation-grid">
-                  <div><strong>Razão Social:</strong> {formData.razaoSocial}</div>
-                  <div><strong>CNPJ:</strong> {formData.cnpj}</div>
-                  <div><strong>Inscrição Municipal:</strong> {formData.inscricaoMunicipal}</div>
-                  <div><strong>Inscrição Estadual:</strong> {formData.inscricaoEstadual}</div>
-                  <div><strong>Endereço:</strong> {`${formData.endereco.rua}, ${formData.endereco.numero} - ${formData.endereco.bairro}, ${formData.endereco.cidade}/${formData.endereco.estado}`}</div>
-                  <div><strong>Telefone Principal:</strong> {formData.telefones[0]?.numero}</div>
-                  <div><strong>Email:</strong> {formData.redesSociais.email}</div>
+              <div className="form-step">
+                <h3>Confirmação dos Dados</h3>
+                <div className="confirmation-box">
+                  <div className="confirm-section">
+                    <h4>Empresa</h4>
+                    <p><strong>Código:</strong> {formData.codigo}</p>
+                    <p><strong>Sigla:</strong> {formData.sigla}</p>
+                    <p><strong>CNPJ:</strong> {formData.cnpj}</p>
+                    <p><strong>Inscrição Municipal:</strong> {formData.inscricaoMunicipal}</p>
+                    <p><strong>Inscrição Estadual:</strong> {formData.inscricaoEstadual}</p>
+                    <p><strong>Razão Social:</strong> {formData.razaoSocial}</p>
+                    <p><strong>Nome Fantasia:</strong> {formData.nomeFantasia}</p>
+                    <p><strong>Nome Site:</strong> {formData.nomeSite}</p>
+                    <p><strong>Tipo de Empresa:</strong> {formData.tipoEmpresa}</p>
+                    <p><strong>Regime Empresarial:</strong> {formData.regimeEmpresarial}</p>
+                    <p><strong>Estado da Empresa:</strong> {formData.estadoEmpresa}</p>
+                  </div>
+
+                  <div className="confirm-section">
+                    <h4>Endereço</h4>
+                    <p><strong>CEP:</strong> {formData.endereco.cep}</p>
+                    <p><strong>Rua:</strong> {formData.endereco.rua}</p>
+                    <p><strong>Número:</strong> {formData.endereco.numero}</p>
+                    <p><strong>Complemento:</strong> {formData.endereco.complemento}</p>
+                    <p><strong>Bairro:</strong> {formData.endereco.bairro}</p>
+                    <p><strong>Cidade:</strong> {formData.endereco.cidade}</p>
+                    <p><strong>Estado:</strong> {formData.endereco.estado}</p>
+                    <p><strong>País:</strong> {formData.endereco.pais}</p>
+                    <p><strong>Link do Google Maps:</strong> {formData.endereco.linkMaps}</p>
+                  </div>
+
+                  <div className="confirm-section">
+                    <h4>Telefones</h4>
+                    {formData.telefones.map((tel, index) => (
+                      <p key={index}><strong>{tel.principal ? "Principal" : "Secundário"}:</strong> {tel.numero} {tel.whatsapp ? "(WhatsApp)" : ""}</p>
+                    ))}
+                  </div>
+
+                  <div className="confirm-section">
+                    <h4>Redes Sociais</h4>
+                    <p><strong>Email:</strong> {formData.redesSociais.email}</p>
+                    <p><strong>Instagram:</strong> {formData.redesSociais.instagram}</p>
+                    <p><strong>Twitter:</strong> {formData.redesSociais.twitter}</p>
+                    <p><strong>TikTok:</strong> {formData.redesSociais.tiktok}</p>
+                  </div>
                 </div>
               </div>
             )}
