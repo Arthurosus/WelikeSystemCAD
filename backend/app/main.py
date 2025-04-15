@@ -110,3 +110,34 @@ def listar_regimes_empresariais(db: Session = Depends(get_db)):
 @app.get("/estados_empresa/")
 def listar_estados_empresa(db: Session = Depends(get_db)):
     return db.query(models.EstadoEmpresa).all()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

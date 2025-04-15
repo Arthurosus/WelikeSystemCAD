@@ -67,6 +67,17 @@ const CompanyRegistration = () => {
     setFormData({ ...formData, endereco: { ...formData.endereco, [name]: value } });
   };
 
+  const toggleFormatoEndereco = () => {
+    const novoFormato = formData.endereco.formato === "brasil" ? "internacional" : "brasil";
+    setFormData({
+      ...formData,
+      endereco: {
+        ...formData.endereco,
+        formato: novoFormato,
+      },
+    });
+  };
+
   const handleTelefoneChange = (index, field, value) => {
     const novos = [...formData.telefones];
     novos[index][field] = field === "numero" ? value : !novos[index][field];
@@ -151,15 +162,34 @@ const CompanyRegistration = () => {
 
             {step === 2 && (
               <div className="form-step">
-                <input className="input" placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="Rua" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="Complemento" name="complemento" value={formData.endereco.complemento} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="Estado" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="País" name="pais" value={formData.endereco.pais} onChange={handleEnderecoChange} />
-                <input className="input" placeholder="Link do Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
+                <label className="sub-label">Formato do Endereço</label>
+                <button type="button" onClick={toggleFormatoEndereco} className="add-btn">
+                  Usar formato {formData.endereco.formato === "brasil" ? "Internacional" : "Brasil"}
+                </button>
+
+                {formData.endereco.formato === "brasil" ? (
+                  <>
+                    <input className="input" placeholder="CEP" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Rua" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Complemento" name="complemento" value={formData.endereco.complemento} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Estado" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Link do Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
+                  </>
+                ) : (
+                  <>
+                    <input className="input" placeholder="Rua" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Número" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Estado/Província" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Região" name="regiao" value={formData.endereco.regiao} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="País" name="pais" value={formData.endereco.pais} onChange={handleEnderecoChange} />
+                    <input className="input" placeholder="Link do Google Maps" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} />
+                  </>
+                )}
+
                 <label className="sub-label">Telefone Principal</label>
                 {formData.telefones.map((tel, index) => (
                   <div key={index} className="telefone-group">
@@ -200,31 +230,23 @@ const CompanyRegistration = () => {
                     <p><strong>Razão Social:</strong> {formData.razaoSocial}</p>
                     <p><strong>Nome Fantasia:</strong> {formData.nomeFantasia}</p>
                     <p><strong>Nome Site:</strong> {formData.nomeSite}</p>
-                    <p><strong>Tipo de Empresa:</strong> {formData.tipoEmpresa}</p>
-                    <p><strong>Regime Empresarial:</strong> {formData.regimeEmpresarial}</p>
-                    <p><strong>Estado da Empresa:</strong> {formData.estadoEmpresa}</p>
                   </div>
-
                   <div className="confirm-section">
                     <h4>Endereço</h4>
-                    <p><strong>CEP:</strong> {formData.endereco.cep}</p>
                     <p><strong>Rua:</strong> {formData.endereco.rua}</p>
                     <p><strong>Número:</strong> {formData.endereco.numero}</p>
-                    <p><strong>Complemento:</strong> {formData.endereco.complemento}</p>
                     <p><strong>Bairro:</strong> {formData.endereco.bairro}</p>
                     <p><strong>Cidade:</strong> {formData.endereco.cidade}</p>
                     <p><strong>Estado:</strong> {formData.endereco.estado}</p>
                     <p><strong>País:</strong> {formData.endereco.pais}</p>
                     <p><strong>Link do Google Maps:</strong> {formData.endereco.linkMaps}</p>
                   </div>
-
                   <div className="confirm-section">
                     <h4>Telefones</h4>
                     {formData.telefones.map((tel, index) => (
                       <p key={index}><strong>{tel.principal ? "Principal" : "Secundário"}:</strong> {tel.numero} {tel.whatsapp ? "(WhatsApp)" : ""}</p>
                     ))}
                   </div>
-
                   <div className="confirm-section">
                     <h4>Redes Sociais</h4>
                     <p><strong>Email:</strong> {formData.redesSociais.email}</p>

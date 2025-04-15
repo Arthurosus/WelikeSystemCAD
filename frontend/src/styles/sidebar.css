@@ -47,8 +47,10 @@
   .submenu {
     background-color: #005eb8;
     transition: max-height 0.3s ease, opacity 0.3s ease;
-    overflow: hidden;
+    overflow-y: auto;
+    max-height: 500px; /* você pode ajustar esse valor ou usar none */
   }
+  
   
   .submenu.visible {
     max-height: 200px;
