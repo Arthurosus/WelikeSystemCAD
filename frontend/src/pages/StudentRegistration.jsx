@@ -144,14 +144,14 @@ const StudentRegistration = () => {
             )}
 
             {step === 3 && (
-              <div className="form-step grid">
-                <label className="checkbox-label">
+              <div className="form-step checkbox-grid">
+                <label className="checkbox-label large">
                   <input type="checkbox" name="nivelamento" checked={formData.nivelamento} onChange={handleChange} /> Nivelamento
                 </label>
-                <label className="checkbox-label">
+                <label className="checkbox-label large">
                   <input type="checkbox" name="emancipadoCTR" checked={formData.emancipadoCTR} onChange={handleChange} /> Emancipado
                 </label>
-                <label className="checkbox-label">
+                <label className="checkbox-label large">
                   <input type="checkbox" name="aprovado" checked={formData.aprovado} onChange={handleChange} /> Aprovado
                 </label>
               </div>
