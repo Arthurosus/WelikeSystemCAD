@@ -22,6 +22,7 @@ const Sidebar = ({ cadastroAberto, setCadastroAberto }) => {
           <div className="submenu-item" onClick={() => navigate("/cadastro-cargos")}>Cadastro de Cargos</div>
           <div className="submenu-item" onClick={() => navigate("/cadastro-salas")}>Cadastro de Sala de Aula</div>
           <div className="submenu-item" onClick={() => navigate("/cadastro-aluno")}>Cadastro de Aluno</div>
+          <div className="submenu-item" onClick={() => navigate("/cadastro-funcionario")}>Cadastro de Funcionário</div>
         </div>
       </nav>
     </aside>
