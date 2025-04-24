@@ -6,6 +6,7 @@ import RoleRegistration from "./pages/RoleRegistration";
 import RoomRegistration from "./pages/RoomRegistration"; // import novo
 import StudentRegistration from "./pages/StudentRegistration";
 import EmployeeRegistration from "./pages/EmployeeRegistration";
+import LessonRegistration from "./pages/LessonRegistration";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/cadastro-salas" element={<RoomRegistration />} />
           <Route path="/cadastro-aluno" element={<StudentRegistration />} />
           <Route path="/cadastro-funcionario" element={<EmployeeRegistration />} />
+          <Route path="/cadastro-aula" element={<LessonRegistration />} />
         </Routes>
       </div>
     </Router>
