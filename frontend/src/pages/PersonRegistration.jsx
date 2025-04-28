@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
@@ -15,6 +14,7 @@ const paises = ["Brasil", "Estados Unidos", "Canadá", "Argentina", "Portugal"];
 const PersonRegistration = () => {
   const [step, setStep] = useState(1);
   const [cadastroAberto, setCadastroAberto] = useState(false);
+  const [mesmoEndereco, setMesmoEndereco] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -31,15 +31,30 @@ const PersonRegistration = () => {
     sTel: "",
     estadoCivil: "",
     franquado: false,
-    endereco: {
+    enderecoMoradia: {
+      formato: "brasil",
       cep: "",
-      tipoEnd: "",
+      zip: "",
       endereco: "",
       numero: "",
       complemento: "",
       bairro: "",
       cidade: "",
       estado: "",
+      regiao: "",
+      pais: "Brasil",
+    },
+    enderecoCorrespondencia: {
+      formato: "brasil",
+      cep: "",
+      zip: "",
+      endereco: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
+      regiao: "",
       pais: "Brasil",
     },
     telefones: [
@@ -52,25 +67,78 @@ const PersonRegistration = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleEnderecoChange = (e) => {
+  const handleEnderecoChange = (section, e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      endereco: { ...formData.endereco, [name]: value },
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [section]: { ...prev[section], [name]: value },
+    }));
+  };
+
+  const toggleFormatoEndereco = (section) => {
+    const novoFormato = formData[section].formato === "brasil" ? "internacional" : "brasil";
+    setFormData((prev) => ({
+      ...prev,
+      [section]: { ...prev[section], formato: novoFormato },
+    }));
+  };
+
+  const buscarEnderecoViaCEP = async (section) => {
+    const cep = formData[section].cep.replace(/\D/g, "");
+    if (cep.length === 8) {
+      try {
+        const res = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+        if (!res.data.erro) {
+          setFormData((prev) => ({
+            ...prev,
+            [section]: {
+              ...prev[section],
+              endereco: res.data.logradouro,
+              bairro: res.data.bairro,
+              cidade: res.data.localidade,
+              estado: res.data.uf,
+              pais: "Brasil",
+            },
+          }));
+        }
+      } catch (err) {
+        console.error("Erro ao buscar CEP:", err);
+      }
+    }
+  };
+
+  const buscarEnderecoViaZIP = async (section) => {
+    const zip = formData[section].zip;
+    if (zip.length >= 5) {
+      try {
+        const res = await axios.get(`https://api.zippopotam.us/us/${zip}`);
+        const info = res.data.places[0];
+        setFormData((prev) => ({
+          ...prev,
+          [section]: {
+            ...prev[section],
+            cidade: info["place name"],
+            estado: info["state abbreviation"],
+            pais: res.data.country,
+          },
+        }));
+      } catch (err) {
+        console.error("Erro ao buscar ZIP Code:", err);
+      }
+    }
   };
 
   const handleTelefoneChange = (index, field, value) => {
-    const novosTelefones = [...formData.telefones];
-    novosTelefones[index][field] = field === "whatsapp" ? !novosTelefones[index][field] : value;
-    setFormData({ ...formData, telefones: novosTelefones });
+    const novos = [...formData.telefones];
+    novos[index][field] = field === "whatsapp" ? !novos[index][field] : value;
+    setFormData({ ...formData, telefones: novos });
   };
 
   const addTelefone = () => {
-    setFormData({
-      ...formData,
-      telefones: [...formData.telefones, { tipo: "", numero: "", whatsapp: false }],
-    });
+    setFormData((prev) => ({
+      ...prev,
+      telefones: [...prev.telefones, { tipo: "", numero: "", whatsapp: false }],
+    }));
   };
 
   const removeTelefone = (index) => {
@@ -78,33 +146,39 @@ const PersonRegistration = () => {
     setFormData({ ...formData, telefones: novos });
   };
 
-  const buscarCEP = async () => {
-    const cep = formData.endereco.cep.replace(/\D/g, "");
-    if (cep.length === 8) {
-      try {
-        const res = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
-        if (!res.data.erro) {
-          setFormData({
-            ...formData,
-            endereco: {
-              ...formData.endereco,
-              endereco: res.data.logradouro,
-              bairro: res.data.bairro,
-              cidade: res.data.localidade,
-              estado: res.data.uf,
-            },
-          });
-        }
-      } catch (err) {
-        console.error("Erro ao buscar CEP", err);
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
   };
+
+  const renderEndereco = (section, label) => (
+      <div className="endereco-section">
+        <h3>{label}</h3>
+
+        <button type="button" onClick={() => toggleFormatoEndereco(section)} className="add-btn">
+          Usar formato {formData[section].formato === "brasil" ? "Internacional" : "Brasil"}
+        </button>
+
+        {formData[section].formato === "brasil" ? (
+            <div className="input-group">
+              <label>CEP</label>
+              <input className="input" name="cep" value={formData[section].cep} onChange={(e) => handleEnderecoChange(section, e)} onBlur={() => buscarEnderecoViaCEP(section)} />
+            </div>
+        ) : (
+            <div className="input-group">
+              <label>ZIP Code</label>
+              <input className="input" name="zip" value={formData[section].zip} onChange={(e) => handleEnderecoChange(section, e)} onBlur={() => buscarEnderecoViaZIP(section)} />
+            </div>
+        )}
+
+        {["endereco", "numero", "complemento", "bairro", "cidade", "estado", "regiao", "pais"].map((field) => (
+            <div className="input-group" key={field}>
+              <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+              <input className="input" name={field} value={formData[section][field]} onChange={(e) => handleEnderecoChange(section, e)} />
+            </div>
+        ))}
+      </div>
+  );
 
   return (
       <div className="main-layout">
@@ -126,89 +200,37 @@ const PersonRegistration = () => {
 
               {step === 1 && (
                   <div className="form-step grid">
-                    <div className="input-group">
-                      <label>Nome Completo</label>
-                      <input className="input" name="nome" value={formData.nome} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Login</label>
-                      <input className="input" name="login" value={formData.login} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Senha</label>
-                      <input className="input" type="password" name="senha" value={formData.senha} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Data de Nascimento</label>
-                      <input className="input" type="date" name="dtNascimento" value={formData.dtNascimento} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Sexo</label>
-                      <input className="input" name="sexo" value={formData.sexo} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Nome da Mãe</label>
-                      <input className="input" name="mae" value={formData.mae} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Email</label>
-                      <input className="input" name="email" value={formData.email} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>CPF</label>
-                      <input className="input" name="cpf" value={formData.cpf} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>RG</label>
-                      <input className="input" name="rg" value={formData.rg} onChange={handleChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>RNE</label>
-                      <input className="input" name="rne" value={formData.rne} onChange={handleChange} />
-                    </div>
+                    {[
+                      ["Nome", "nome"],
+                      ["Login", "login"],
+                      ["Senha", "senha"],
+                      ["Data de Nascimento", "dtNascimento"],
+                      ["Sexo", "sexo"],
+                      ["Nome da Mãe", "mae"],
+                      ["Email", "email"],
+                      ["CPF", "cpf"],
+                      ["RG", "rg"],
+                      ["RNE", "rne"],
+                    ].map(([label, name]) => (
+                        <div className="input-group" key={name}>
+                          <label>{label}</label>
+                          <input className="input" type={name === "senha" ? "password" : (name === "dtNascimento" ? "date" : "text")} name={name} value={formData[name]} onChange={handleChange} />
+                        </div>
+                    ))}
                   </div>
               )}
 
               {step === 2 && (
                   <div className="form-step grid">
-                    <div className="input-group">
-                      <label>CEP</label>
-                      <input className="input" name="cep" value={formData.endereco.cep} onBlur={buscarCEP} onChange={handleEnderecoChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Endereço</label>
-                      <input className="input" name="endereco" value={formData.endereco.endereco} onChange={handleEnderecoChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Número</label>
-                      <input className="input" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Complemento</label>
-                      <input className="input" name="complemento" value={formData.endereco.complemento} onChange={handleEnderecoChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Bairro</label>
-                      <input className="input" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Cidade</label>
-                      <input className="input" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-                    </div>
-                    <div className="input-group">
-                      <label>Estado</label>
-                      <select className="input" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange}>
-                        <option value="">Estado</option>
-                        {estadosBrasil.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
-                      </select>
-                    </div>
-                    <div className="input-group">
-                      <label>País</label>
-                      <select className="input" name="pais" value={formData.endereco.pais} onChange={handleEnderecoChange}>
-                        <option value="">País</option>
-                        {paises.map((pais) => <option key={pais} value={pais}>{pais}</option>)}
-                      </select>
-                    </div>
+                    {renderEndereco("enderecoMoradia", "Endereço de Moradia")}
+
+                    <label className="checkbox-endereco-mesmo">
+                      <input type="checkbox" checked={mesmoEndereco} onChange={(e) => setMesmoEndereco(e.target.checked)} />
+                      Endereço de Correspondência é o mesmo
+                    </label>
+
+
+                    {!mesmoEndereco && renderEndereco("enderecoCorrespondencia", "Endereço de Correspondência")}
                   </div>
               )}
 
@@ -234,6 +256,7 @@ const PersonRegistration = () => {
                 {step < 3 && <button type="button" className="btn continue" onClick={() => setStep(step + 1)}>Continuar</button>}
                 {step === 3 && <button type="submit" className="btn submit">Cadastrar</button>}
               </div>
+
             </form>
           </div>
         </div>

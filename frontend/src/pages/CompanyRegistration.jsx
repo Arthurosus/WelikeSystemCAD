@@ -31,6 +31,7 @@ const CompanyRegistration = () => {
     endereco: {
       formato: "brasil",
       cep: "",
+      zip: "",
       rua: "",
       numero: "",
       complemento: "",
@@ -78,6 +79,50 @@ const CompanyRegistration = () => {
     });
   };
 
+  const buscarEnderecoViaCEP = async () => {
+    const cep = formData.endereco.cep.replace(/\D/g, "");
+    if (cep.length === 8) {
+      try {
+        const res = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+        if (!res.data.erro) {
+          setFormData((prev) => ({
+            ...prev,
+            endereco: {
+              ...prev.endereco,
+              rua: res.data.logradouro,
+              bairro: res.data.bairro,
+              cidade: res.data.localidade,
+              estado: res.data.uf,
+            },
+          }));
+        }
+      } catch (err) {
+        console.error("Erro ao buscar CEP:", err);
+      }
+    }
+  };
+
+  const buscarEnderecoViaZip = async () => {
+    const zip = formData.endereco.zip;
+    if (zip.length >= 5) {
+      try {
+        const res = await axios.get(`https://api.zippopotam.us/us/${zip}`);
+        const info = res.data.places[0];
+        setFormData((prev) => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco,
+            cidade: info["place name"],
+            estado: info["state abbreviation"],
+            pais: res.data.country,
+          },
+        }));
+      } catch (err) {
+        console.error("Erro ao buscar ZIP Code:", err);
+      }
+    }
+  };
+
   const handleTelefoneChange = (index, field, value) => {
     const novos = [...formData.telefones];
     novos[index][field] = field === "numero" ? value : !novos[index][field];
@@ -85,8 +130,10 @@ const CompanyRegistration = () => {
   };
 
   const addTelefone = () => {
-    const novosTelefones = [...formData.telefones, { numero: "", principal: false, whatsapp: false }];
-    setFormData({ ...formData, telefones: novosTelefones });
+    setFormData({
+      ...formData,
+      telefones: [...formData.telefones, { numero: "", principal: false, whatsapp: false }],
+    });
   };
 
   const removeTelefone = (index) => {
@@ -130,45 +177,46 @@ const CompanyRegistration = () => {
 
               {mensagemSucesso && <p className="success-message">{mensagemSucesso}</p>}
 
-              {/* Step 1: Empresa */}
               {step === 1 && (
                   <div className="form-step grid">
-                    <label className="input-group">Código da Empresa<input className="input" name="codigo" value={formData.codigo} onChange={handleChange} /></label>
-                    <label className="input-group">Sigla da Empresa<input className="input" name="sigla" value={formData.sigla} onChange={handleChange} /></label>
-                    <label className="input-group">CNPJ<input className="input" name="cnpj" value={formData.cnpj} onChange={handleChange} /></label>
-                    <label className="input-group">Inscrição Municipal<input className="input" name="inscricaoMunicipal" value={formData.inscricaoMunicipal} onChange={handleChange} /></label>
-                    <label className="input-group">Inscrição Estadual<input className="input" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} /></label>
-                    <label className="input-group">Razão Social<input className="input" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} /></label>
-                    <label className="input-group">Nome Fantasia<input className="input" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} /></label>
-                    <label className="input-group">Nome do Site<input className="input" name="nomeSite" value={formData.nomeSite} onChange={handleChange} /></label>
+                    {[
+                      ["Código", "codigo"],
+                      ["Sigla", "sigla"],
+                      ["CNPJ", "cnpj"],
+                      ["Inscrição Municipal", "inscricaoMunicipal"],
+                      ["Inscrição Estadual", "inscricaoEstadual"],
+                      ["Razão Social", "razaoSocial"],
+                      ["Nome Fantasia", "nomeFantasia"],
+                      ["Nome do Site", "nomeSite"]
+                    ].map(([label, name]) => (
+                        <label key={name} className="input-group">{label}
+                          <input className="input" name={name} value={formData[name]} onChange={handleChange} />
+                        </label>
+                    ))}
+
                     <label className="input-group">Tipo de Empresa
                       <select className="input" name="tipoEmpresa" value={formData.tipoEmpresa} onChange={handleChange}>
                         <option value="">Selecione</option>
-                        {tiposEmpresa.map((tipo) => (
-                            <option key={tipo.id} value={tipo.id}>{tipo.nome}</option>
-                        ))}
+                        {tiposEmpresa.map((tipo) => <option key={tipo.id} value={tipo.id}>{tipo.nome}</option>)}
                       </select>
                     </label>
+
                     <label className="input-group">Regime Empresarial
                       <select className="input" name="regimeEmpresarial" value={formData.regimeEmpresarial} onChange={handleChange}>
                         <option value="">Selecione</option>
-                        {regimesEmpresariais.map((regime) => (
-                            <option key={regime.id} value={regime.id}>{regime.nome}</option>
-                        ))}
+                        {regimesEmpresariais.map((regime) => <option key={regime.id} value={regime.id}>{regime.nome}</option>)}
                       </select>
                     </label>
+
                     <label className="input-group">Estado da Empresa
                       <select className="input" name="estadoEmpresa" value={formData.estadoEmpresa} onChange={handleChange}>
                         <option value="">Selecione</option>
-                        {estadosEmpresa.map((estado) => (
-                            <option key={estado.id} value={estado.id}>{estado.nome}</option>
-                        ))}
+                        {estadosEmpresa.map((estado) => <option key={estado.id} value={estado.id}>{estado.nome}</option>)}
                       </select>
                     </label>
                   </div>
               )}
 
-              {/* Step 2: Endereço */}
               {step === 2 && (
                   <div className="form-step">
                     <label className="sub-label">Formato do Endereço</label>
@@ -178,36 +226,35 @@ const CompanyRegistration = () => {
 
                     {formData.endereco.formato === "brasil" ? (
                         <>
-                          <label className="input-group">CEP<input className="input" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Rua<input className="input" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Número<input className="input" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Complemento<input className="input" name="complemento" value={formData.endereco.complemento} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Bairro<input className="input" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Cidade<input className="input" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Estado<input className="input" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} /></label>
+                          <label className="input-group">CEP
+                            <input className="input" name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} onBlur={buscarEnderecoViaCEP} />
+                          </label>
                         </>
                     ) : (
                         <>
-                          <label className="input-group">Rua<input className="input" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Número<input className="input" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Cidade<input className="input" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Estado/Província<input className="input" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">Região<input className="input" name="regiao" value={formData.endereco.regiao} onChange={handleEnderecoChange} /></label>
-                          <label className="input-group">País<input className="input" name="pais" value={formData.endereco.pais} onChange={handleEnderecoChange} /></label>
+                          <label className="input-group">ZIP Code
+                            <input className="input" name="zip" value={formData.endereco.zip} onChange={handleEnderecoChange} onBlur={buscarEnderecoViaZip} />
+                          </label>
                         </>
                     )}
-                    <label className="input-group">Link do Google Maps<input className="input" name="linkMaps" value={formData.endereco.linkMaps} onChange={handleEnderecoChange} /></label>
 
-                    <label className="sub-label">Telefone Principal</label>
+                    {["rua", "numero", "complemento", "bairro", "cidade", "estado", "regiao", "pais", "linkMaps"].map((field) => (
+                        <label key={field} className="input-group">{field.charAt(0).toUpperCase() + field.slice(1)}
+                          <input className="input" name={field} value={formData.endereco[field]} onChange={handleEnderecoChange} />
+                        </label>
+                    ))}
+
+                    <label className="sub-label">Telefones</label>
                     {formData.telefones.map((tel, index) => (
                         <div key={index} className="telefone-group">
-                          {index === 1 && <label className="sub-label">Telefones Secundários</label>}
                           <div className="telefone-inputs">
                             <input type="text" value={tel.numero} onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)} placeholder="(00) 91234-5678" />
                             <label>
                               <input type="checkbox" checked={tel.whatsapp} onChange={() => handleTelefoneChange(index, "whatsapp")} /> WhatsApp
                             </label>
-                            {index > 0 && (<button type="button" onClick={() => removeTelefone(index)} className="remove-btn">X</button>)}
+                            {index > 0 && (
+                                <button type="button" onClick={() => removeTelefone(index)} className="remove-btn">X</button>
+                            )}
                           </div>
                         </div>
                     ))}
@@ -215,13 +262,13 @@ const CompanyRegistration = () => {
                   </div>
               )}
 
-              {/* Step 3: Redes Sociais */}
               {step === 3 && (
                   <div className="form-step">
-                    <label className="input-group">E-mail<input className="input" name="email" value={formData.redesSociais.email} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, email: e.target.value } })} /></label>
-                    <label className="input-group">Instagram<input className="input" value={formData.redesSociais.instagram} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, instagram: e.target.value } })} /></label>
-                    <label className="input-group">Twitter<input className="input" value={formData.redesSociais.twitter} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, twitter: e.target.value } })} /></label>
-                    <label className="input-group">TikTok<input className="input" value={formData.redesSociais.tiktok} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, tiktok: e.target.value } })} /></label>
+                    {["email", "instagram", "twitter", "tiktok"].map((field) => (
+                        <label key={field} className="input-group">{field.charAt(0).toUpperCase() + field.slice(1)}
+                          <input className="input" value={formData.redesSociais[field]} onChange={(e) => setFormData({ ...formData, redesSociais: { ...formData.redesSociais, [field]: e.target.value } })} />
+                        </label>
+                    ))}
                   </div>
               )}
 
@@ -239,11 +286,16 @@ const CompanyRegistration = () => {
                         <p><strong>Razão Social:</strong> {formData.razaoSocial}</p>
                         <p><strong>Nome Fantasia:</strong> {formData.nomeFantasia}</p>
                         <p><strong>Nome do Site:</strong> {formData.nomeSite}</p>
+                        <p><strong>Tipo de Empresa:</strong> {formData.tipoEmpresa}</p>
+                        <p><strong>Regime Empresarial:</strong> {formData.regimeEmpresarial}</p>
+                        <p><strong>Estado da Empresa:</strong> {formData.estadoEmpresa}</p>
                       </div>
 
                       <div className="confirm-section">
                         <h4>Endereço</h4>
                         <p><strong>Formato:</strong> {formData.endereco.formato}</p>
+                        <p><strong>CEP:</strong> {formData.endereco.cep}</p>
+                        <p><strong>ZIP:</strong> {formData.endereco.zip}</p>
                         <p><strong>Rua:</strong> {formData.endereco.rua}</p>
                         <p><strong>Número:</strong> {formData.endereco.numero}</p>
                         <p><strong>Complemento:</strong> {formData.endereco.complemento}</p>
@@ -252,17 +304,13 @@ const CompanyRegistration = () => {
                         <p><strong>Estado:</strong> {formData.endereco.estado}</p>
                         <p><strong>Região:</strong> {formData.endereco.regiao}</p>
                         <p><strong>País:</strong> {formData.endereco.pais}</p>
-                        <p><strong>CEP:</strong> {formData.endereco.cep}</p>
-                        <p><strong>Link do Google Maps:</strong> {formData.endereco.linkMaps}</p>
+                        <p><strong>Link Google Maps:</strong> {formData.endereco.linkMaps}</p>
                       </div>
 
                       <div className="confirm-section">
                         <h4>Telefones</h4>
                         {formData.telefones.map((tel, index) => (
-                            <p key={index}>
-                              <strong>{tel.principal ? "Principal" : "Secundário"}:</strong> {tel.numero}
-                              {tel.whatsapp && " (WhatsApp)"}
-                            </p>
+                            <p key={index}><strong>{tel.principal ? "Principal" : "Secundário"}:</strong> {tel.numero} {tel.whatsapp && "(WhatsApp)"}</p>
                         ))}
                       </div>
 
