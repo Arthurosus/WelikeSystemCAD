@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 from typing import Optional, List
+from pydantic import BaseModel, constr
 
 # 🔹 Esquemas para Empresa
 class EmpresaBase(BaseModel):
@@ -17,7 +17,8 @@ class EmpresaBase(BaseModel):
     exibir_site: Optional[bool] = False
 
 class TelefoneBase(BaseModel):
-    numero: str
+    codigo_pais: str = "+55"  # Novo campo para código do país
+    numero: constr(pattern=r'^\d{8,11}$')  # Corrigido para Pydantic 2
     principal: bool = False
     whatsapp: bool = False
 

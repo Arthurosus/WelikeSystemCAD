@@ -130,9 +130,18 @@ const PersonRegistration = () => {
 
   const handleTelefoneChange = (index, field, value) => {
     const novos = [...formData.telefones];
-    novos[index][field] = field === "whatsapp" ? !novos[index][field] : value;
+
+    if (field === "whatsapp") {
+      novos[index].whatsapp = !novos[index].whatsapp;
+    } else if (field === "codigo_pais") {
+      novos[index].codigo_pais = value;
+    } else if (field === "numero") {
+      novos[index].numero = value;
+    }
+
     setFormData({ ...formData, telefones: novos });
   };
+
 
   const addTelefone = () => {
     setFormData((prev) => ({
@@ -155,30 +164,79 @@ const PersonRegistration = () => {
       <div className="endereco-section">
         <h3>{label}</h3>
 
-        <button type="button" onClick={() => toggleFormatoEndereco(section)} className="add-btn">
-          Usar formato {formData[section].formato === "brasil" ? "Internacional" : "Brasil"}
-        </button>
+        {/* Botão fora do grid */}
+        <div className="form-toggle-format">
+          <button
+              type="button"
+              onClick={() => toggleFormatoEndereco(section)}
+              className="add-btn"
+          >
+            Usar formato {formData[section].formato === "brasil" ? "Internacional" : "Brasil"}
+          </button>
+        </div>
 
-        {formData[section].formato === "brasil" ? (
-            <div className="input-group">
-              <label>CEP</label>
-              <input className="input" name="cep" value={formData[section].cep} onChange={(e) => handleEnderecoChange(section, e)} onBlur={() => buscarEnderecoViaCEP(section)} />
-            </div>
-        ) : (
-            <div className="input-group">
-              <label>ZIP Code</label>
-              <input className="input" name="zip" value={formData[section].zip} onChange={(e) => handleEnderecoChange(section, e)} onBlur={() => buscarEnderecoViaZIP(section)} />
-            </div>
-        )}
+        {/* Agora começa o GRID apenas para campos */}
+        <div className="address-grid">
+          {formData[section].formato === "brasil" ? (
+              <>
+                <div className="input-group">
+                  <label>CEP</label>
+                  <input className="input" name="cep" value={formData[section].cep} onChange={(e) => handleEnderecoChange(section, e)} onBlur={() => buscarEnderecoViaCEP(section)} />
+                </div>
+                <div className="input-group">
+                  <label>Número</label>
+                  <input className="input" name="numero" value={formData[section].numero} onChange={(e) => handleEnderecoChange(section, e)} />
+                </div>
+              </>
+          ) : (
+              <>
+                <div className="input-group">
+                  <label>ZIP Code</label>
+                  <input className="input" name="zip" value={formData[section].zip} onChange={(e) => handleEnderecoChange(section, e)} onBlur={() => buscarEnderecoViaZIP(section)} />
+                </div>
+                <div className="input-group">
+                  <label>Número</label>
+                  <input className="input" name="numero" value={formData[section].numero} onChange={(e) => handleEnderecoChange(section, e)} />
+                </div>
+              </>
+          )}
 
-        {["endereco", "numero", "complemento", "bairro", "cidade", "estado", "regiao", "pais"].map((field) => (
-            <div className="input-group" key={field}>
-              <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-              <input className="input" name={field} value={formData[section][field]} onChange={(e) => handleEnderecoChange(section, e)} />
-            </div>
-        ))}
+          <div className="input-group">
+            <label>Endereço</label>
+            <input className="input" name="endereco" value={formData[section].endereco} onChange={(e) => handleEnderecoChange(section, e)} />
+          </div>
+          <div className="input-group">
+            <label>Complemento</label>
+            <input className="input" name="complemento" value={formData[section].complemento} onChange={(e) => handleEnderecoChange(section, e)} />
+          </div>
+
+          <div className="input-group">
+            <label>Bairro</label>
+            <input className="input" name="bairro" value={formData[section].bairro} onChange={(e) => handleEnderecoChange(section, e)} />
+          </div>
+          <div className="input-group">
+            <label>Cidade</label>
+            <input className="input" name="cidade" value={formData[section].cidade} onChange={(e) => handleEnderecoChange(section, e)} />
+          </div>
+
+          <div className="input-group">
+            <label>Estado</label>
+            <input className="input" name="estado" value={formData[section].estado} onChange={(e) => handleEnderecoChange(section, e)} />
+          </div>
+          <div className="input-group">
+            <label>Região</label>
+            <input className="input" name="regiao" value={formData[section].regiao} onChange={(e) => handleEnderecoChange(section, e)} />
+          </div>
+
+          <div className="input-group" style={{ gridColumn: "1 / span 2" }}>
+            <label>País</label>
+            <input className="input" name="pais" value={formData[section].pais} onChange={(e) => handleEnderecoChange(section, e)} />
+          </div>
+        </div>
       </div>
   );
+
+
 
   return (
       <div className="main-layout">
@@ -221,16 +279,27 @@ const PersonRegistration = () => {
               )}
 
               {step === 2 && (
-                  <div className="form-step grid">
-                    {renderEndereco("enderecoMoradia", "Endereço de Moradia")}
+                  <div className="form-step">
+                    <div className="address-grid">
+                      {renderEndereco("enderecoMoradia", "Endereço de Moradia")}
+                    </div>
 
-                    <label className="checkbox-endereco-mesmo">
-                      <input type="checkbox" checked={mesmoEndereco} onChange={(e) => setMesmoEndereco(e.target.checked)} />
-                      Endereço de Correspondência é o mesmo
-                    </label>
+                    <div className="checkbox-endereco-wrapper">
+                      <label className="checkbox-endereco-mesmo">
+                        <input
+                            type="checkbox"
+                            checked={mesmoEndereco}
+                            onChange={(e) => setMesmoEndereco(e.target.checked)}
+                        />
+                        Endereço de Correspondência é o mesmo
+                      </label>
+                    </div>
 
-
-                    {!mesmoEndereco && renderEndereco("enderecoCorrespondencia", "Endereço de Correspondência")}
+                    {!mesmoEndereco && (
+                        <div className="address-grid">
+                          {renderEndereco("enderecoCorrespondencia", "Endereço de Correspondência")}
+                        </div>
+                    )}
                   </div>
               )}
 
@@ -240,16 +309,53 @@ const PersonRegistration = () => {
                     {formData.telefones.map((tel, index) => (
                         <div className="telefone-group" key={index}>
                           <div className="telefone-inputs">
-                            <input className="input" placeholder="Tipo" value={tel.tipo} onChange={(e) => handleTelefoneChange(index, "tipo", e.target.value)} />
-                            <input className="input" placeholder="Número" value={tel.numero} onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)} />
-                            <label><input type="checkbox" checked={tel.whatsapp} onChange={() => handleTelefoneChange(index, "whatsapp")} /> WhatsApp</label>
-                            {index > 0 && <button type="button" className="remove-btn" onClick={() => removeTelefone(index)}>X</button>}
+
+                            <select
+                                className="select-codigo-pais"
+                                value={tel.codigo_pais || "+55"}
+                                onChange={(e) => handleTelefoneChange(index, "codigo_pais", e.target.value)}
+                            >
+                              <option value="+55">🇧🇷 +55</option>
+                              <option value="+1">🇺🇸 +1</option>
+                              <option value="+44">🇬🇧 +44</option>
+                              <option value="+351">🇵🇹 +351</option>
+                              <option value="+81">🇯🇵 +81</option>
+                            </select>
+
+                            <input
+                                className="input"
+                                placeholder="Número"
+                                value={tel.numero}
+                                onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
+                                maxLength={11}
+                            />
+
+                            <label>
+                              <input
+                                  type="checkbox"
+                                  checked={tel.whatsapp}
+                                  onChange={() => handleTelefoneChange(index, "whatsapp")}
+                              /> WhatsApp
+                            </label>
+
+                            {index > 0 && (
+                                <button
+                                    type="button"
+                                    className="remove-btn"
+                                    onClick={() => removeTelefone(index)}
+                                >
+                                  X
+                                </button>
+                            )}
                           </div>
                         </div>
                     ))}
-                    <button type="button" className="add-btn" onClick={addTelefone}>Adicionar Telefone</button>
+                    <button type="button" className="add-btn" onClick={addTelefone}>
+                      Adicionar Telefone
+                    </button>
                   </div>
               )}
+
 
               <div className="navigation-buttons">
                 {step > 1 && <button type="button" className="btn back" onClick={() => setStep(step - 1)}>Voltar</button>}

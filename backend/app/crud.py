@@ -33,3 +33,11 @@ def create_empresa(db: Session, empresa: EmpresaCreate):
 
     db.commit()
     return db_empresa
+
+for tel in empresa.telefones:
+    db_tel = Telefone(
+        empresa_id=db_empresa.id,
+        codigo_pais=tel.codigo_pais,  # NOVO
+        **tel.dict(exclude={"codigo_pais"})  # Ignora duplicação
+    )
+    db.add(db_tel)

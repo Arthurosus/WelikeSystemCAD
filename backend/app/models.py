@@ -52,11 +52,13 @@ class Telefone(Base):
     __tablename__ = "telefones"
 
     id = Column(Integer, primary_key=True, index=True)
+    codigo_pais = Column(String(5), nullable=False, default="+55")  # ✅ NOVO CAMPO
     numero = Column(String(20), nullable=False)
     principal = Column(Boolean, default=False)
     whatsapp = Column(Boolean, default=False)
     empresa_id = Column(Integer, ForeignKey("empresas.id"))
     empresa = relationship("Empresa", back_populates="telefones")
+
 
 class RedeSocial(Base):
     __tablename__ = "redes_sociais"
