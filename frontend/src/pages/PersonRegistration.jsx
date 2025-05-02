@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
-import "../styles/companyRegistration.css";
+import "../styles/companyRegistration.css"
+import HeaderActions from "../components/HeaderActions";
+
 
 const estadosBrasil = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -243,6 +245,7 @@ const PersonRegistration = () => {
         <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
         <div className="content">
           <div className="header-bar"></div>
+          <HeaderActions categoria="pessoas" />
           <div className="registration-container">
             <form onSubmit={handleSubmit} className="form-box">
               <div className="form-header">

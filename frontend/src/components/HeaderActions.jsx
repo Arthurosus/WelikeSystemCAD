@@ -9,14 +9,17 @@ const HeaderActions = ({ categoria }) => {
         pessoas: [
             { label: "Novo Cadastro", onClick: () => navigate("/cadastro-pessoas") },
             { label: "Listar Pessoas", onClick: () => {} }, // futuras ações
+            { label: "Editar Cadastro de Pessoa", onClick: () => {} }, // futuras ações
         ],
         empresas: [
             { label: "Nova Empresa", onClick: () => navigate("/cadastro-empresas") },
-            { label: "Relatórios", onClick: () => {} },
+            { label: "Listar Empresas", onClick: () => navigate("/lista-empresas")    },
+            { label: "Editar Cadastro de Empresa", onClick: () => {} }, // futuras ações
         ],
         alunos: [
             { label: "Novo Aluno", onClick: () => navigate("/cadastro-aluno") },
-            { label: "Gerenciar Matrículas", onClick: () => {} },
+            { label: "Listar Alunos", onClick: () => {} },
+            { label: "Editar Cadastro de Aluno", onClick: () => {} }, // futuras ações
         ],
         // adicionar mais categorias conforme for expandindo
     };

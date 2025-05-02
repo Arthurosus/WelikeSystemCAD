@@ -9,89 +9,15 @@ body {
   height: 100vh;
 }
 
-.sidebar {
-  width: 240px;
-  background-color: #004c97;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 1rem;
-}
-
-.logo {
-  width: 140px;
-  margin-bottom: 2rem;
-}
-
-.menu {
-  width: 100%;
-}
-
-.menu-item {
-  padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: left;
-  padding-left: 2rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-  position: relative;
-}
-
-.menu-item:hover {
-  background-color: #0060bf;
-}
-
-.arrow {
-  float: right;
-  margin-right: 1rem;
-  transition: transform 0.3s ease;
-}
-
-.arrow.open {
-  transform: rotate(180deg);
-}
-
-.submenu {
-  background-color: #005eb8;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-  overflow: hidden;
-}
-
-.submenu.visible {
-  max-height: 200px;
-  opacity: 1;
-  padding-left: 2.5rem;
-}
-
-.submenu.hidden {
-  max-height: 0;
-  opacity: 0;
-  padding-left: 2.5rem;
-}
-
-.submenu-item {
-  padding: 0.75rem;
-  cursor: pointer;
-  color: #fff;
-  transition: background-color 0.2s;
-}
-
-.submenu-item:hover {
-  background-color: #0075cc;
-}
 
 .content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding-top: 135px;
+  margin-left: 240px;
 }
 
-.header-bar {
-  height: 50px;
-  background-color: #009fdf;
-}
 
 .registration-container {
   flex: 1;
@@ -503,4 +429,51 @@ input[type="checkbox"] {
 
 .form-toggle-format {
   margin-bottom: 1rem;
+}
+
+/* Barra azul no topo do conteúdo (logo abaixo do menu lateral) */
+.header-bar {
+  height: 50px;
+  background: #009fdf;
+
+  /* passa a ser FIXA na viewport */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;          /* garante 100 % de largura */
+  z-index: 1100;     /* acima de todo o restante */
+}
+
+
+/* --- faixa dos botões fixos -------------------------------------------------*/
+.header-actions {
+  position: fixed;      /* fica presa no topo também          */
+  top: 50px;            /* 50 px = altura da .header-bar      */
+  left: 0;
+  right: 0;
+  z-index: 1050;        /* logo abaixo da .header-bar         */
+
+  background: #009fdf;  /* mesma cor da barra                 */
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  padding: 12px 0;
+}
+
+/* botões sobre fundo azul – branco para contraste */
+.header-actions .header-btn {
+  background: #ffffff;
+  color: #0078c9;
+  border: 2px solid #ffffff;
+}
+
+.header-actions .header-btn:hover,
+.header-actions .header-btn:focus {
+  background: #e5f4ff;
+  border-color: #e5f4ff;
+}
+
+.header-actions .header-btn:active {
+  background: #cce9ff;
+  border-color: #cce9ff;
 }

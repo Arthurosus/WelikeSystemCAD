@@ -1,3 +1,4 @@
+// src/components/Sidebar.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
@@ -5,55 +6,120 @@ import "../styles/sidebar.css";
 
 const Sidebar = ({ cadastroAberto, setCadastroAberto }) => {
   const navigate = useNavigate();
-  const [relatoriosAbertos, setRelatoriosAbertos] = useState(false);
   const [operacoesAbertos, setOperacoesAbertos] = useState(false);
+  const [relatoriosAbertos, setRelatoriosAbertos] = useState(false);
 
   return (
-    <aside className="sidebar">
-      <img src={logo} alt="Logo Welike" className="logo" />
-      <nav className="menu">
-        {/* Submenu Cadastros */}
-        <div
-          className="menu-item"
-          onClick={() => setCadastroAberto(!cadastroAberto)}
-        >
-          Cadastros <span className={`arrow ${cadastroAberto ? "open" : "closed"}`}>&#9662;</span>
-        </div>
-        <div className={`submenu ${cadastroAberto ? "visible" : "hidden"}`}>
-          <div className="submenu-item" onClick={() => navigate("/")}>Cadastro de Empresas</div>
-          <div className="submenu-item" onClick={() => navigate("/cadastro-pessoas")}>Cadastro de Pessoas</div>
-          <div className="submenu-item" onClick={() => navigate("/cadastro-cargos")}>Cadastro de Cargos</div>
-          <div className="submenu-item" onClick={() => navigate("/cadastro-salas")}>Cadastro de Sala de Aula</div>
-          <div className="submenu-item" onClick={() => navigate("/cadastro-aluno")}>Cadastro de Aluno</div>
-          <div className="submenu-item" onClick={() => navigate("/cadastro-funcionario")}>Cadastro de Funcionário</div>
-          <div className="submenu-item" onClick={() => navigate("/cadastro-aula")}>Cadastro de Aula</div>
-        </div>
+      <aside className="sidebar">
+        <img src={logo} alt="Logo Welike" className="logo" />
 
-        {/* NOVO submenu Operações */}
-        <div
-            className="menu-item"
-            onClick={() => setOperacoesAbertos(!operacoesAbertos)}
-        >
-          Operações <span className={`arrow ${operacoesAbertos ? "open" : "closed"}`}>&#9662;</span>
-        </div>
-        <div className={`submenu ${operacoesAbertos ? "visible" : "hidden"}`}>
-          <div className="submenu-item" onClick={() => navigate("/operacao-financeiro")}>Operacao Financeira</div>
-          <div className="submenu-item" onClick={() => navigate("/operacao-pedagogico")}>Operacao Pedagógica</div>
-        </div>
+        <nav className="menu">
+          {/* ------------------- Cadastros ------------------- */}
+          <div
+              className={`menu-item ${cadastroAberto ? "open" : ""}`}
+              onClick={() => setCadastroAberto(!cadastroAberto)}
+          >
+            Cadastros{" "}
+            <span className={`arrow ${cadastroAberto ? "open" : "closed"}`}>
+            &#9662;
+          </span>
+          </div>
 
-        {/* NOVO submenu Relatórios */}
-        <div
-            className="menu-item"
-            onClick={() => setRelatoriosAbertos(!relatoriosAbertos)}
-        >
-          Relatórios <span className={`arrow ${relatoriosAbertos ? "open" : "closed"}`}>&#9662;</span>
-        </div>
-        <div className={`submenu ${relatoriosAbertos ? "visible" : "hidden"}`}>
-          <div className="submenu-item" onClick={() => navigate("/relatorio-financeiro")}>Relatório Financeiro</div>
-          <div className="submenu-item" onClick={() => navigate("/relatorio-pedagogico")}>Relatório Pedagógico</div>
-        </div>
-      </nav>
-    </aside>
+          <div className={`submenu ${cadastroAberto ? "visible" : "hidden"}`}>
+            <div className="submenu-item" onClick={() => navigate("/cadastro-empresas")}>
+              Cadastro de Empresas
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/cadastro-pessoas")}
+            >
+              Cadastro de Pessoas
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/cadastro-cargos")}
+            >
+              Cadastro de Cargos
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/cadastro-salas")}
+            >
+              Cadastro de Sala de Aula
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/cadastro-aluno")}
+            >
+              Cadastro de Aluno
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/cadastro-funcionario")}
+            >
+              Cadastro de Funcionário
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/cadastro-aula")}
+            >
+              Cadastro de Aula
+            </div>
+          </div>
+
+          {/* ------------------- Operações ------------------- */}
+          <div
+              className={`menu-item ${operacoesAbertos ? "open" : ""}`}
+              onClick={() => setOperacoesAbertos(!operacoesAbertos)}
+          >
+            Operações{" "}
+            <span className={`arrow ${operacoesAbertos ? "open" : "closed"}`}>
+            &#9662;
+          </span>
+          </div>
+
+          <div className={`submenu ${operacoesAbertos ? "visible" : "hidden"}`}>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/operacao-financeiro")}
+            >
+              Operação Financeira
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/operacao-pedagogico")}
+            >
+              Operação Pedagógica
+            </div>
+          </div>
+
+          {/* ------------------- Relatórios ------------------- */}
+          <div
+              className={`menu-item ${relatoriosAbertos ? "open" : ""}`}
+              onClick={() => setRelatoriosAbertos(!relatoriosAbertos)}
+          >
+            Relatórios{" "}
+            <span className={`arrow ${relatoriosAbertos ? "open" : "closed"}`}>
+            &#9662;
+          </span>
+          </div>
+
+          <div className={`submenu ${relatoriosAbertos ? "visible" : "hidden"}`}>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/relatorio-financeiro")}
+            >
+              Relatório Financeiro
+            </div>
+            <div
+                className="submenu-item"
+                onClick={() => navigate("/relatorio-pedagogico")}
+            >
+              Relatório Pedagógico
+            </div>
+          </div>
+        </nav>
+      </aside>
   );
 };
 

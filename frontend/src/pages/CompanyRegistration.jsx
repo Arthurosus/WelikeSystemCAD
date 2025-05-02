@@ -3,6 +3,7 @@ import axios from "axios";
 import "../styles/companyRegistration.css";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
+import HeaderActions  from "../components/HeaderActions";
 
 const CompanyRegistration = () => {
   const [step, setStep] = useState(1);
@@ -160,6 +161,7 @@ const CompanyRegistration = () => {
       <div className="main-layout">
         <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
         <div className="content">
+          <HeaderActions categoria="empresas" />
           <div className="header-bar"></div>
           <div className="registration-container">
             <form onSubmit={handleSubmit} className="form-box">
