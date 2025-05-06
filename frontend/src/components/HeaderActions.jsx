@@ -8,18 +8,39 @@ const HeaderActions = ({ categoria }) => {
     const actions = {
         pessoas: [
             { label: "Novo Cadastro", onClick: () => navigate("/cadastro-pessoas") },
-            { label: "Listar Pessoas", onClick: () => {} }, // futuras ações
+            { label: "Listar Pessoas", onClick: () => navigate("/lista-pessoas") },
             { label: "Editar Cadastro de Pessoa", onClick: () => {} }, // futuras ações
         ],
         empresas: [
             { label: "Nova Empresa", onClick: () => navigate("/cadastro-empresas") },
-            { label: "Listar Empresas", onClick: () => navigate("/lista-empresas")    },
-            { label: "Editar Cadastro de Empresa", onClick: () => {} }, // futuras ações
+            { label: "Listar Empresas", onClick: () => navigate("/lista-empresas")  },
+            { label: "Editar Cadastro de Empresa", onClick: () => navigate("/editar-empresas")  },
+
         ],
         alunos: [
             { label: "Novo Aluno", onClick: () => navigate("/cadastro-aluno") },
             { label: "Listar Alunos", onClick: () => {} },
             { label: "Editar Cadastro de Aluno", onClick: () => {} }, // futuras ações
+        ],
+        cargos: [
+            { label: "Novo Cargo", onClick: () => navigate("/cadastro-cargos") },
+            { label: "Listar Cargos", onClick: () => {} },
+            { label: "Editar Cadastro de cargos", onClick: () => {} }, // futuras ações
+        ],
+        salas: [
+            { label: "Nova Sala de Aula", onClick: () => navigate("/cadastro-salas") },
+            { label: "Listar Salas", onClick: () => {} },
+            { label: "Editar Cadastro de salas", onClick: () => {} }, // futuras ações
+        ],
+        funcionarios: [
+            { label: "Novo Funcionário", onClick: () => navigate("/cadastro-funcionarios") },
+            { label: "Listar Funcionários", onClick: () => {} },
+            { label: "Editar Cadastro de funcionários", onClick: () => {} }, // futuras ações
+        ],
+        aulas: [
+            { label: "Nova Aula", onClick: () => navigate("/cadastro-aula") },
+            { label: "Listar Funcionários", onClick: () => {} },
+            { label: "Editar Cadastro de funcionários", onClick: () => {} }, // futuras ações
         ],
         // adicionar mais categorias conforme for expandindo
     };

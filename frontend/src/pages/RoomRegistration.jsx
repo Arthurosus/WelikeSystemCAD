@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "../components/Sidebar"; // ajuste o caminho se necessário
 import "../styles/companyRegistration.css"; // ou crie uma css própria
 import { useNavigate } from "react-router-dom";
+import HeaderActions from "../components/HeaderActions";
 
 const RoomRegistration = () => {
   const [cadastroAberto, setCadastroAberto] = useState(false);
@@ -12,6 +13,7 @@ const RoomRegistration = () => {
       <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
 
       <div className="content">
+        <HeaderActions categoria="salas" />
         <div className="header-bar"></div>
 
         <div className="registration-container">

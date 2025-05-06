@@ -10,6 +10,8 @@ import StudentRegistration   from "./pages/StudentRegistration";
 import EmployeeRegistration  from "./pages/EmployeeRegistration";
 import LessonRegistration    from "./pages/LessonRegistration";
 import CompanyListing        from "./pages/CompanyListing";
+import PersonListing from "./pages/PersonListing";
+import CompanyEditing from "./pages/CompanyEditing";
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
 
           {/* demais rotas */}
           <Route path="/cadastro-empresas"    element={<CompanyRegistration />} />
+            <Route path="/editar-empresas"    element={<CompanyEditing />} />
           <Route path="/cadastro-pessoas"     element={<PersonRegistration />} />
           <Route path="/cadastro-cargos"      element={<RoleRegistration />} />
           <Route path="/cadastro-salas"       element={<RoomRegistration />} />
@@ -27,6 +30,7 @@ function App() {
           <Route path="/cadastro-funcionario" element={<EmployeeRegistration />} />
           <Route path="/lista-empresas"       element={<CompanyListing />} />
           <Route path="/cadastro-aula"        element={<LessonRegistration />} />
+          <Route path="/lista-pessoas"    element={<PersonListing />} />
         </Routes>
       </Router>
   );

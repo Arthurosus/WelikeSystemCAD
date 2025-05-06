@@ -167,7 +167,7 @@ const CompanyRegistration = () => {
           <div className="registration-container">
             <form onSubmit={handleSubmit} className="form-box">
               <div className="form-header">
-                <h2>Cadastro de Empresa</h2>
+                <h2>Edição de Cadastro</h2>
                 <span className="step-info">Etapa {step} de 4</span>
               </div>
 

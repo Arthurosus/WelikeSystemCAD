@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
-import "../styles/companyRegistration.css"
 import HeaderActions from "../components/HeaderActions";
+import "../styles/companyRegistration.css";
 
 
 const estadosBrasil = [
@@ -18,10 +18,10 @@ const PersonRegistration = () => {
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [mesmoEndereco, setMesmoEndereco] = useState(false);
 
+  /* ----------------------- STATE PRINCIPAL ------------------------------ */
   const [formData, setFormData] = useState({
+    // **Removido login e senha**
     nome: "",
-    login: "",
-    senha: "",
     dtNascimento: "",
     sexo: "",
     mae: "",
@@ -33,6 +33,7 @@ const PersonRegistration = () => {
     sTel: "",
     estadoCivil: "",
     franquado: false,
+
     enderecoMoradia: {
       formato: "brasil",
       cep: "",
@@ -64,6 +65,7 @@ const PersonRegistration = () => {
     ]
   });
 
+  /* ----------------------- HANDLERS ------------------------------------- */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -85,6 +87,7 @@ const PersonRegistration = () => {
     }));
   };
 
+  /* ----------------------- BUSCA CEP / ZIP ------------------------------ */
   const buscarEnderecoViaCEP = async (section) => {
     const cep = formData[section].cep.replace(/\D/g, "");
     if (cep.length === 8) {
@@ -130,9 +133,9 @@ const PersonRegistration = () => {
     }
   };
 
+  /* ----------------------- TELEFONES ------------------------------------ */
   const handleTelefoneChange = (index, field, value) => {
     const novos = [...formData.telefones];
-
     if (field === "whatsapp") {
       novos[index].whatsapp = !novos[index].whatsapp;
     } else if (field === "codigo_pais") {
@@ -140,10 +143,8 @@ const PersonRegistration = () => {
     } else if (field === "numero") {
       novos[index].numero = value;
     }
-
     setFormData({ ...formData, telefones: novos });
   };
-
 
   const addTelefone = () => {
     setFormData((prev) => ({
@@ -157,27 +158,21 @@ const PersonRegistration = () => {
     setFormData({ ...formData, telefones: novos });
   };
 
+  /* ----------------------- SUBMIT --------------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
   };
 
+  /* ----------------------- RENDER ENDEREÇO ------------------------------ */
   const renderEndereco = (section, label) => (
       <div className="endereco-section">
         <h3>{label}</h3>
-
-        {/* Botão fora do grid */}
         <div className="form-toggle-format">
-          <button
-              type="button"
-              onClick={() => toggleFormatoEndereco(section)}
-              className="add-btn"
-          >
+          <button type="button" onClick={() => toggleFormatoEndereco(section)} className="add-btn">
             Usar formato {formData[section].formato === "brasil" ? "Internacional" : "Brasil"}
           </button>
         </div>
-
-        {/* Agora começa o GRID apenas para campos */}
         <div className="address-grid">
           {formData[section].formato === "brasil" ? (
               <>
@@ -211,7 +206,6 @@ const PersonRegistration = () => {
             <label>Complemento</label>
             <input className="input" name="complemento" value={formData[section].complemento} onChange={(e) => handleEnderecoChange(section, e)} />
           </div>
-
           <div className="input-group">
             <label>Bairro</label>
             <input className="input" name="bairro" value={formData[section].bairro} onChange={(e) => handleEnderecoChange(section, e)} />
@@ -220,7 +214,6 @@ const PersonRegistration = () => {
             <label>Cidade</label>
             <input className="input" name="cidade" value={formData[section].cidade} onChange={(e) => handleEnderecoChange(section, e)} />
           </div>
-
           <div className="input-group">
             <label>Estado</label>
             <input className="input" name="estado" value={formData[section].estado} onChange={(e) => handleEnderecoChange(section, e)} />
@@ -229,7 +222,6 @@ const PersonRegistration = () => {
             <label>Região</label>
             <input className="input" name="regiao" value={formData[section].regiao} onChange={(e) => handleEnderecoChange(section, e)} />
           </div>
-
           <div className="input-group" style={{ gridColumn: "1 / span 2" }}>
             <label>País</label>
             <input className="input" name="pais" value={formData[section].pais} onChange={(e) => handleEnderecoChange(section, e)} />
@@ -238,14 +230,13 @@ const PersonRegistration = () => {
       </div>
   );
 
-
-
+  /* ----------------------- JSX PRINCIPAL -------------------------------- */
   return (
       <div className="main-layout">
         <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
         <div className="content">
-          <div className="header-bar"></div>
           <HeaderActions categoria="pessoas" />
+          <div className="header-bar"></div>
           <div className="registration-container">
             <form onSubmit={handleSubmit} className="form-box">
               <div className="form-header">
@@ -259,12 +250,11 @@ const PersonRegistration = () => {
                 ))}
               </div>
 
+              {/* ---------------- ETAPA 1 ---------------- */}
               {step === 1 && (
                   <div className="form-step grid">
                     {[
                       ["Nome", "nome"],
-                      ["Login", "login"],
-                      ["Senha", "senha"],
                       ["Data de Nascimento", "dtNascimento"],
                       ["Sexo", "sexo"],
                       ["Nome da Mãe", "mae"],
@@ -275,12 +265,19 @@ const PersonRegistration = () => {
                     ].map(([label, name]) => (
                         <div className="input-group" key={name}>
                           <label>{label}</label>
-                          <input className="input" type={name === "senha" ? "password" : (name === "dtNascimento" ? "date" : "text")} name={name} value={formData[name]} onChange={handleChange} />
+                          <input
+                              className="input"
+                              type={name === "dtNascimento" ? "date" : "text"}
+                              name={name}
+                              value={formData[name]}
+                              onChange={handleChange}
+                          />
                         </div>
                     ))}
                   </div>
               )}
 
+              {/* ---------------- ETAPA 2 ---------------- */}
               {step === 2 && (
                   <div className="form-step">
                     <div className="address-grid">
@@ -289,11 +286,7 @@ const PersonRegistration = () => {
 
                     <div className="checkbox-endereco-wrapper">
                       <label className="checkbox-endereco-mesmo">
-                        <input
-                            type="checkbox"
-                            checked={mesmoEndereco}
-                            onChange={(e) => setMesmoEndereco(e.target.checked)}
-                        />
+                        <input type="checkbox" checked={mesmoEndereco} onChange={(e) => setMesmoEndereco(e.target.checked)} />
                         Endereço de Correspondência é o mesmo
                       </label>
                     </div>
@@ -306,13 +299,13 @@ const PersonRegistration = () => {
                   </div>
               )}
 
+              {/* ---------------- ETAPA 3 ---------------- */}
               {step === 3 && (
                   <div className="form-step">
                     <h4>Telefones</h4>
                     {formData.telefones.map((tel, index) => (
                         <div className="telefone-group" key={index}>
                           <div className="telefone-inputs">
-
                             <select
                                 className="select-codigo-pais"
                                 value={tel.codigo_pais || "+55"}
@@ -324,7 +317,6 @@ const PersonRegistration = () => {
                               <option value="+351">🇵🇹 +351</option>
                               <option value="+81">🇯🇵 +81</option>
                             </select>
-
                             <input
                                 className="input"
                                 placeholder="Número"
@@ -332,40 +324,24 @@ const PersonRegistration = () => {
                                 onChange={(e) => handleTelefoneChange(index, "numero", e.target.value)}
                                 maxLength={11}
                             />
-
                             <label>
-                              <input
-                                  type="checkbox"
-                                  checked={tel.whatsapp}
-                                  onChange={() => handleTelefoneChange(index, "whatsapp")}
-                              /> WhatsApp
+                              <input type="checkbox" checked={tel.whatsapp} onChange={() => handleTelefoneChange(index, "whatsapp")}/> WhatsApp
                             </label>
-
                             {index > 0 && (
-                                <button
-                                    type="button"
-                                    className="remove-btn"
-                                    onClick={() => removeTelefone(index)}
-                                >
-                                  X
-                                </button>
+                                <button type="button" className="remove-btn" onClick={() => removeTelefone(index)}>X</button>
                             )}
                           </div>
                         </div>
                     ))}
-                    <button type="button" className="add-btn" onClick={addTelefone}>
-                      Adicionar Telefone
-                    </button>
+                    <button type="button" className="add-btn" onClick={addTelefone}>Adicionar Telefone</button>
                   </div>
               )}
-
 
               <div className="navigation-buttons">
                 {step > 1 && <button type="button" className="btn back" onClick={() => setStep(step - 1)}>Voltar</button>}
                 {step < 3 && <button type="button" className="btn continue" onClick={() => setStep(step + 1)}>Continuar</button>}
                 {step === 3 && <button type="submit" className="btn submit">Cadastrar</button>}
               </div>
-
             </form>
           </div>
         </div>

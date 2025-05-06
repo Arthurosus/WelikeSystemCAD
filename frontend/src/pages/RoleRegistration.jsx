@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import "../styles/companyRegistration.css";
+import HeaderActions from "../components/HeaderActions";
+
 
 const RoleRegistration = () => {
   const [formData, setFormData] = useState({
@@ -31,6 +33,7 @@ const RoleRegistration = () => {
       <div className="main-layout">
         <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
         <div className="content">
+          <HeaderActions categoria="cargos" />
           <div className="header-bar"></div>
           <div className="registration-container">
             <form className="form-box" onSubmit={handleSubmit}>
