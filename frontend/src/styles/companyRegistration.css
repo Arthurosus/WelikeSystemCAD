@@ -539,3 +539,12 @@ td.actions-cell{
   justify-content:center;
   gap:10px;           /* ajuste o valor conforme desejar */
 }
+/* === buttons inside action-group (tabelas de listagem) === */
+.action-group {
+  display: inline-flex;
+  gap: 6px;           /* distância horizontal entre os botões */
+}
+
+.action-group .btn.small-btn {
+  padding: 4px 8px;   /* mantém compacto */
+}
