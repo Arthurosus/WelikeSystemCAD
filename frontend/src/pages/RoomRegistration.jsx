@@ -1,37 +1,39 @@
 import React, { useState } from "react";
-import Sidebar from "../components/Sidebar"; // ajuste o caminho se necessário
-import "../styles/companyRegistration.css"; // ou crie uma css própria
-import { useNavigate } from "react-router-dom";
-import HeaderActions from "../components/HeaderActions";
+import axios                 from "axios";
 
-const RoomRegistration = () => {
-  const [cadastroAberto, setCadastroAberto] = useState(false);
-  const navigate = useNavigate();
+import Sidebar        from "../components/Sidebar";
+import HeaderActions  from "../components/HeaderActions";
+import RoomForm       from "../components/RoomForm";
 
-  return (
-    <div className="main-layout">
-      <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
+import "../styles/companyRegistration.css";
 
-      <div className="content">
-        <HeaderActions categoria="salas" />
-        <div className="header-bar"></div>
 
-        <div className="registration-container">
-          <form className="form-box">
-            <div className="form-header">
-              <h2>Cadastro de Sala de Aula</h2>
+export default function RoomRegistration() {
+    const [cadastroAberto, setCadastroAberto] = useState(false);
+
+    const handleCreate = async (data) => {
+        console.log("ENVIAR (mock):", data);  //  ← troque pelo back‑end real
+        /* // integração real:
+           await axios.post("http://127.0.0.1:8000/salas/", data);
+        */
+        alert("Sala cadastrada (mock)!");
+    };
+
+    return (
+        <div className="main-layout">
+            <Sidebar
+                cadastroAberto={cadastroAberto}
+                setCadastroAberto={setCadastroAberto}
+            />
+
+            <div className="content">
+                <HeaderActions categoria="salas" />
+                <div className="header-bar" />
+
+                <div className="registration-container">
+                    <RoomForm mode="create" onSubmit={handleCreate} />
+                </div>
             </div>
-
-            <div className="form-step">
-              <input className="input" placeholder="Nome da Sala" name="nomeSala" />
-              <input className="input" placeholder="Limite de Alunos" name="limiteAlunos" type="number" />
-              <button type="submit" className="btn submit">Cadastrar</button>
-            </div>
-          </form>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export default RoomRegistration;
+    );
+}

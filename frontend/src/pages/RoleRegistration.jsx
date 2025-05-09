@@ -1,118 +1,55 @@
+// ─────────────────────────────────────────────────────────────
+// src/pages/RoleRegistration.jsx
+// ─────────────────────────────────────────────────────────────
 import React, { useState } from "react";
-import Sidebar from "../components/Sidebar";
-import "../styles/companyRegistration.css";
+import axios from "axios";
+
+import Sidebar       from "../components/Sidebar";
 import HeaderActions from "../components/HeaderActions";
+import RoleForm      from "../components/RoleForm";
 
+import "../styles/companyRegistration.css";   // mesmo CSS base
 
-const RoleRegistration = () => {
-  const [formData, setFormData] = useState({
-    codEmpresa: "",
-    codCargo: "",
-    professor: false,
-    descricao: "",
-    ativo: false,
-  });
+const USE_MOCK = true;   // mude para false quando conectar ao back‑end
 
+/**                CADASTRO DE CARGO (usa RoleForm)                    **/
+export default function RoleRegistration() {
   const [cadastroAberto, setCadastroAberto] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, type, value, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
+  /* callback chamado quando RoleForm conclui */
+  const handleCreate = async (data) => {
+    if (USE_MOCK) {
+      console.log("ENVIAR CARGO (mock):", data);
+      alert("Cargo cadastrado (mock)!");
+      return;
+    }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Dados do cargo:", formData);
-    // Aqui entraria o POST para a API futuramente
+    try {
+      await axios.post("http://127.0.0.1:8000/cargos/", data);
+      alert("Cargo cadastrado com sucesso!");
+    } catch (err) {
+      console.error("Erro ao criar cargo:", err);
+      alert("Falha ao cadastrar cargo.");
+    }
   };
 
   return (
       <div className="main-layout">
-        <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
+        <Sidebar
+            cadastroAberto={cadastroAberto}
+            setCadastroAberto={setCadastroAberto}
+        />
+
         <div className="content">
+          {/* barra azul com botões da categoria */}
           <HeaderActions categoria="cargos" />
-          <div className="header-bar"></div>
+          <div className="header-bar" />
+
+          {/* formulário */}
           <div className="registration-container">
-            <form className="form-box" onSubmit={handleSubmit}>
-              <div className="form-header">
-                <h2>Cadastro de Cargo</h2>
-                <span className="step-info">Etapa 1 de 1</span>
-              </div>
-
-              <div className="form-step grid">
-                <div className="input-group">
-                  <label htmlFor="codEmpresa">Código da Empresa</label>
-                  <input
-                      className="input"
-                      id="codEmpresa"
-                      name="codEmpresa"
-                      value={formData.codEmpresa}
-                      onChange={handleChange}
-                  />
-                </div>
-
-                <div className="input-group">
-                  <label htmlFor="codCargo">Código do Cargo</label>
-                  <input
-                      className="input"
-                      id="codCargo"
-                      name="codCargo"
-                      value={formData.codCargo}
-                      onChange={handleChange}
-                  />
-                </div>
-
-                <div className="input-group checkbox-container">
-                  <input
-                      type="checkbox"
-                      id="professor"
-                      name="professor"
-                      checked={formData.professor}
-                      onChange={handleChange}
-                  />
-                  <label className="checkbox-label" htmlFor="professor">
-                    É Professor(a)
-                  </label>
-                </div>
-
-                <div className="input-group">
-                  <label htmlFor="descricao">Descrição</label>
-                  <input
-                      className="input"
-                      id="descricao"
-                      name="descricao"
-                      value={formData.descricao}
-                      onChange={handleChange}
-                  />
-                </div>
-
-                <div className="input-group checkbox-container">
-                  <input
-                      type="checkbox"
-                      id="ativo"
-                      name="ativo"
-                      checked={formData.ativo}
-                      onChange={handleChange}
-                  />
-                  <label className="checkbox-label" htmlFor="ativo">
-                    Cargo Ativo
-                  </label>
-                </div>
-              </div>
-
-              <div className="navigation-buttons">
-                <button type="submit" className="btn submit">
-                  Cadastrar
-                </button>
-              </div>
-            </form>
+            <RoleForm mode="create" onSubmit={handleCreate} />
           </div>
         </div>
       </div>
   );
-};
-
-export default RoleRegistration;
+}

@@ -9,40 +9,32 @@ const HeaderActions = ({ categoria }) => {
         pessoas: [
             { label: "Novo Cadastro", onClick: () => navigate("/cadastro-pessoas") },
             { label: "Listar Pessoas", onClick: () => navigate("/lista-pessoas") },
-            { label: "Editar Cadastro de Pessoa", onClick: () => {} }, // futuras ações
         ],
         empresas: [
             { label: "Nova Empresa", onClick: () => navigate("/cadastro-empresas") },
             { label: "Listar Empresas", onClick: () => navigate("/lista-empresas")  },
-            { label: "Editar Cadastro de Empresa", onClick: () => navigate("/editar-empresas")  },
 
         ],
         alunos: [
             { label: "Novo Aluno", onClick: () => navigate("/cadastro-aluno") },
-            { label: "Listar Alunos", onClick: () => {} },
-            { label: "Editar Cadastro de Aluno", onClick: () => {} }, // futuras ações
+            { label: "Alunos Cadastrados", onClick: () => navigate("/lista-alunos") },
         ],
         cargos: [
             { label: "Novo Cargo", onClick: () => navigate("/cadastro-cargos") },
-            { label: "Listar Cargos", onClick: () => {} },
-            { label: "Editar Cadastro de cargos", onClick: () => {} }, // futuras ações
+            { label: "Listar Cargos", onClick: () => navigate("/lista-cargos") },
         ],
         salas: [
             { label: "Nova Sala de Aula", onClick: () => navigate("/cadastro-salas") },
-            { label: "Listar Salas", onClick: () => {} },
-            { label: "Editar Cadastro de salas", onClick: () => {} }, // futuras ações
+            { label: "Listar Salas", onClick: () => navigate("/lista-salas") },
         ],
         funcionarios: [
-            { label: "Novo Funcionário", onClick: () => navigate("/cadastro-funcionarios") },
-            { label: "Listar Funcionários", onClick: () => {} },
-            { label: "Editar Cadastro de funcionários", onClick: () => {} }, // futuras ações
+            { label: "Novo Funcionário", onClick: () => navigate("/cadastro-funcionario") },
+            { label: "Funcionários Cadastrados", onClick: () => navigate("/lista-funcionarios") },
         ],
         aulas: [
             { label: "Nova Aula", onClick: () => navigate("/cadastro-aula") },
-            { label: "Listar Funcionários", onClick: () => {} },
-            { label: "Editar Cadastro de funcionários", onClick: () => {} }, // futuras ações
+            { label: "Aulas Cadastradas", onClick: () => navigate("/lista-aulas") },
         ],
-        // adicionar mais categorias conforme for expandindo
     };
 
     return (

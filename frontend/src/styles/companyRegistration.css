@@ -477,3 +477,65 @@ input[type="checkbox"] {
   background: #cce9ff;
   border-color: #cce9ff;
 }
+/* ──────────────────────────────────────────────────────────────── */
+/* LISTAGEM PADRÃO (empresas, pessoas, etc.)                       */
+/* ──────────────────────────────────────────────────────────────── */
+
+.listing-wrapper        { width: 100%; max-width: 1100px; }
+
+.listing-table          { width: 100%; border-collapse: collapse; }
+.listing-table thead tr { background: #eaf3fc; }
+
+.listing-table th,
+.listing-table td {
+  padding: 8px 10px;
+  font-size: 0.95rem;
+}
+
+.listing-table th {
+  padding: 10px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #c9e2ff;
+}
+
+.listing-table th.actions,
+.listing-table td.actions {            /* coluna “Ações” centralizada   */
+  text-align: center;
+  width: 120px;
+}
+
+.listing-table td {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* botões pequenos (✏️   🗑️) ------------------------------------- */
+.btn.small-btn        { padding: 5px 12px; font-size: .9rem; border-radius: 6px; }
+.btn.small-btn.danger { background: #dc3545; color: #fff; }   /* lixeira */
+
+/* ───────────────── MODAL GENÉRICO (reuso em todas as listagens) ────────── */
+.modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex; justify-content:center; align-items:center;
+  z-index:2000;
+}
+
+.modal-box{
+  background:#fff;
+  border-radius:8px;
+  padding:24px;
+  width:400px; max-width:90%;
+  box-shadow:0 4px 18px rgba(0,0,0,.3);
+}
+
+.modal-box h3{margin-top:0}
+.modal-actions{text-align:right;margin-top:4px}
+.modal-actions .btn{min-width:110px}
+/* ------------------------------------------------------------------------ */
+/* todas as células de ações viram flex‑linha com espaçamento uniforme */
+td.actions-cell{
+  display:flex;
+  justify-content:center;
+  gap:10px;           /* ajuste o valor conforme desejar */
+}

@@ -1,0 +1,83 @@
+.modal-overlay{
+    position:fixed;inset:0;display:flex;justify-content:center;align-items:center;
+    background:rgba(0,0,0,.55);z-index:3000;
+}
+
+.modal-box{
+    background:#fff;border-radius:8px;padding:28px 36px;max-width:600px;width:90%;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);font-family:Segoe UI,Arial,sans-serif;
+}
+
+.modal-title{margin:0 0 22px;font-size:1.25rem;font-weight:600}
+
+/* tabela “vertical” */
+.detail-grid{
+    display:grid;grid-template-columns:150px 1fr;row-gap:10px;
+}
+.detail-key{
+    font-weight:600;color:#333
+}
+.detail-val{
+    word-break:break-word;
+}
+.detail-val pre.json{
+    margin:0;padding:6px 8px;background:#f6f8fa;border-radius:4px;font-size:.87rem;
+}
+
+/* ações */
+.modal-actions{margin-top:32px;text-align:right}
+.modal-actions.center{text-align:center}
+/* ----------  layout já existente permanece  ---------- */
+
+/* detalhes principais */
+.detail-grid{
+    display:grid;
+    grid-template-columns:160px 1fr;
+    row-gap:12px;
+}
+
+/* chave do nível raiz */
+.detail-key{
+    font-weight:600;
+    color:#333;
+}
+
+/* valor raiz */
+.detail-val{
+    word-break:break-word;
+}
+
+/* ----------  NOVO: estilos recursivos ---------- */
+.dv-obj{
+    background:#f6f8fa;
+    border-radius:6px;
+    padding:10px 12px;
+    font-size:.9rem;
+}
+
+.dv-row{
+    display:flex;
+    gap:8px;
+    line-height:1.4;
+    margin-bottom:6px;
+}
+
+.dv-key{
+    font-weight:600;
+    color:#24292f;
+    min-width:80px;
+}
+
+.dv-prim{
+    color:#1d1d1d;
+}
+
+.dv-null{
+    font-style:italic;
+    color:#8a8a8a;
+}
+
+.dv-empty{
+    font-style:italic;
+    color:#999;
+}
