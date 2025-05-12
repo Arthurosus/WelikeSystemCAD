@@ -1,12 +1,16 @@
-import React, { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+// ────────────────────────────────────────────────────────────────
+// src/pages/PersonListing.jsx
+// ────────────────────────────────────────────────────────────────
+import React, { useEffect, useMemo, useState } from "react";
+import axios           from "axios";
 import { useNavigate } from "react-router-dom";
 
-import Sidebar       from "../components/Sidebar";
-import HeaderActions from "../components/HeaderActions";
+import Sidebar        from "../components/Sidebar";
+import HeaderActions  from "../components/HeaderActions";
+import DetailModal    from "../components/DetailModal";   // 👁️ visualizar
 import "../styles/companyRegistration.css";
 
-/* ─── MOCK opcional ───────────────────── */
+/* ——— MOCK opcional ——————————————————————————————————————— */
 const MOCK_PESSOAS = [
   { id:1,nome:"Ana Beatriz da Silva", cpf:"123.456.789‑01", email:"ana@email.com",
     telefone:"(11) 99999‑1234", endereco:{estado:"SP",cidade:"São Paulo"} },
@@ -16,23 +20,26 @@ const MOCK_PESSOAS = [
     telefone:"(31) 97777‑5555", endereco:{estado:"MG",cidade:"Belo Horizonte"} },
 ];
 
-const USE_MOCK  = true;
-const ADMIN_PWD = "sasa0309";
+const USE_MOCK  = true;          // ← troque para false no back‑end
+const ADMIN_PWD = "sasa0309";    // senha de exclusão (mock)
 
-/* ─── Componente ─────────────────────── */
-const PersonListing = () => {
+/* ——— Componente ————————————————————————————————————————— */
+export default function PersonListing() {
   const [cadastroAberto,setCadastroAberto] = useState(false);
   const [pessoas,setPessoas]               = useState([]);
   const [search,setSearch]                 = useState("");
 
-  /* modal */
+  /* modais */
   const [showDeleteModal,setShowDeleteModal] = useState(false);
   const [deletePwd,setDeletePwd]             = useState("");
   const [targetId,setTargetId]               = useState(null);
 
+  const [showDetail,setShowDetail] = useState(false);
+  const [detailItem,setDetailItem] = useState(null);
+
   const navigate = useNavigate();
 
-  /* carregar pessoas */
+  /* carregar lista */
   useEffect(()=>{
     if (USE_MOCK){ setPessoas(MOCK_PESSOAS); return; }
     (async()=>{
@@ -42,17 +49,19 @@ const PersonListing = () => {
   },[]);
 
   /* filtro + ordenação */
-  const pessoasFiltradas = useMemo(()=>(
-      pessoas
-          .filter(p=>
-              p.nome .toLowerCase().includes(search.toLowerCase())||
-              p.cpf  .toLowerCase().includes(search.toLowerCase())||
-              (p.email??"").toLowerCase().includes(search.toLowerCase()))
-          .sort((a,b)=>a.nome.localeCompare(b.nome))
-  ),[pessoas,search]);
+  const pessoasFiltradas = useMemo(() =>
+          pessoas
+              .filter(p =>
+                  p.nome.toLowerCase().includes(search.toLowerCase())   ||
+                  p.cpf .toLowerCase().includes(search.toLowerCase())   ||
+                  (p.email??"").toLowerCase().includes(search.toLowerCase()))
+              .sort((a,b)=>a.nome.localeCompare(b.nome))
+      ,[pessoas,search]);
 
   /* handlers */
   const askDelete = id => { setTargetId(id); setDeletePwd(""); setShowDeleteModal(true); };
+  const handleEdit  = id  => navigate(`/editar-pessoa/${id}`);
+  const handleView  = row => { setDetailItem(row); setShowDetail(true); };
 
   const confirmDelete = async () => {
     if(deletePwd!==ADMIN_PWD){ alert("Senha incorreta!"); return; }
@@ -67,9 +76,7 @@ const PersonListing = () => {
     setShowDeleteModal(false);
   };
 
-  const handleEdit = id => navigate(`/editar-pessoa/${id}`);
-
-  /* JSX */
+  /* ——— JSX —————————————————————————————————————————— */
   return(
       <div className="main-layout">
         <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto}/>
@@ -81,10 +88,16 @@ const PersonListing = () => {
             <div className="form-box" style={{maxWidth:1100,width:"100%"}}>
               <div className="form-header"><h2>Pessoas Cadastradas</h2></div>
 
-              <input className="input" style={{margin:"0 0 1rem 0"}}
-                     placeholder="Pesquisar por nome, CPF ou e‑mail…"
-                     value={search} onChange={e=>setSearch(e.target.value)}/>
+              {/* pesquisa */}
+              <input
+                  className="input"
+                  style={{margin:"0 0 1rem 0"}}
+                  placeholder="Pesquisar por nome, CPF ou e‑mail…"
+                  value={search}
+                  onChange={e=>setSearch(e.target.value)}
+              />
 
+              {/* tabela */}
               <div style={{overflowX:"auto"}}>
                 <table style={{width:"100%",borderCollapse:"collapse"}}>
                   <thead>
@@ -105,14 +118,16 @@ const PersonListing = () => {
                         <td style={td}>{p.email}</td>
                         <td style={td}>{p.endereco?.estado??"-"}</td>
                         <td style={td}>{p.endereco?.cidade??"-"}</td>
-                        <td style={{...td,textAlign:"center"}}>
-                          <button className="btn small-btn"       onClick={()=>handleEdit(p.id)}>✏️</button>
-                          <button className="btn small-btn danger" style={{marginLeft:8}}
-                                  onClick={()=>askDelete(p.id)}>🗑️</button>
+                        <td className="action-cell">
+                          <div className="action-buttons">
+                            <button className="btn small-btn"        onClick={()=>handleEdit(p.id)}>✏️</button>
+                            <button className="btn small-btn info"   onClick={()=>handleView(p)}>👁️</button>
+                            <button className="btn small-btn danger" onClick={()=>askDelete(p.id)}>🗑️</button>
+                          </div>
                         </td>
                       </tr>
                   ))}
-                  {pessoasFiltradas.length===0&&(
+                  {pessoasFiltradas.length===0 && (
                       <tr><td style={td} colSpan={6}>Nenhuma pessoa encontrada</td></tr>
                   )}
                   </tbody>
@@ -122,15 +137,29 @@ const PersonListing = () => {
           </div>
         </div>
 
-        {/* modal (mesmo visual do CompanyListing) */}
-        {showDeleteModal&&(
+        {/* modal detalhe */}
+        {showDetail && detailItem && (
+            <DetailModal
+                title={`Pessoa – ${detailItem.nome}`}
+                item={detailItem}
+                onClose={()=>setShowDetail(false)}
+            />
+        )}
+
+        {/* modal exclusão */}
+        {showDeleteModal && (
             <div className="modal-overlay">
               <div className="modal-box">
                 <h3>Confirmação de Exclusão</h3>
                 <p>Digite a senha de administrador para EXCLUIR:</p>
-                <input type="password" className="input" placeholder="Senha"
-                       value={deletePwd} onChange={e=>setDeletePwd(e.target.value)}
-                       style={{margin:"8px 0 16px 0"}}/>
+                <input
+                    type="password"
+                    className="input"
+                    placeholder="Senha"
+                    value={deletePwd}
+                    onChange={e=>setDeletePwd(e.target.value)}
+                    style={{margin:"8px 0 16px 0"}}
+                />
                 <div className="modal-actions">
                   <button className="btn back"   onClick={()=>setShowDeleteModal(false)}>Cancelar</button>
                   <button className="btn danger" style={{marginLeft:8}} onClick={confirmDelete}>Excluir</button>
@@ -140,11 +169,9 @@ const PersonListing = () => {
         )}
       </div>
   );
-};
+}
 
-/* estilos inline de tabela (iguais) */
+/* estilos inline básicos da tabela */
 const th={padding:"10px",textAlign:"left",fontWeight:600,borderBottom:"2px solid #c9e2ff"};
-const thCenter={...th,textAlign:"center",width:120};
+const thCenter={...th,textAlign:"center",width:140};
 const td={padding:"8px 10px",borderBottom:"1px solid #e0e0e0",fontSize:"0.95rem"};
-
-export default PersonListing;

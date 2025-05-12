@@ -23,6 +23,7 @@ import RoomEditing from "./pages/RoomEditing";
 import RoomListing from "./pages/RoomListing";
 import LessonEditing from "./pages/LessonEditing";
 import LessonListing from "./pages/LessonListing";
+import WelcomePage from "./pages/WelcomePage";
 
 
 
@@ -32,7 +33,10 @@ function App() {
       <Router>
         <Routes>
           {/* rota padrão */}
-          <Route path="/" element={<Navigate to="/cadastro-empresas" replace />} />
+          <Route path="/"   element={<Navigate to="/welcome" replace />} />
+
+          {/* Página Inicial */}
+          <Route path="/welcome"   element={<WelcomePage />} />
 
           {/* cadastros */}
           <Route path="/cadastro-empresas"    element={<CompanyRegistration />} />

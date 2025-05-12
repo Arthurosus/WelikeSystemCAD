@@ -85,3 +85,14 @@
 }
 
 .submenu-item:hover { background-color: #0075cc; }
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: background .15s;
+}
+.logo-wrapper:hover {
+  background: rgba(255,255,255,.06);
+}

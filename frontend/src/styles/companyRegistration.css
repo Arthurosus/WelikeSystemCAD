@@ -1,3 +1,5 @@
+/* === CSS FINAL COM DADOS FUNDIDOS === */
+
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -9,7 +11,6 @@ body {
   height: 100vh;
 }
 
-
 .content {
   flex: 1;
   display: flex;
@@ -17,7 +18,6 @@ body {
   padding-top: 135px;
   margin-left: 240px;
 }
-
 
 .registration-container {
   flex: 1;
@@ -35,7 +35,6 @@ body {
   width: 100%;
   max-width: 900px;
 }
-
 
 .form-header {
   display: flex;
@@ -78,7 +77,6 @@ body {
   gap: 1rem;
   width: 100%;
 }
-
 
 .input-group {
   display: flex;
@@ -230,7 +228,6 @@ body {
   overflow-y: auto;
 }
 
-
 .large-checkbox input[type="checkbox"] {
   width: 20px;
   height: 20px;
@@ -335,7 +332,6 @@ input[type="checkbox"] {
   color: #0b2e13;
 }
 
-/* Ocultar seção de contratante quando aluno for o contratante */
 .hidden-section {
   display: none;
 }
@@ -378,6 +374,7 @@ input[type="checkbox"] {
   margin-bottom: 1rem;
   align-self: flex-start;
 }
+
 .checkbox-endereco-mesmo {
   display: flex;
   align-items: center;
@@ -403,6 +400,7 @@ input[type="checkbox"] {
   transform: scale(1.2);
   accent-color: #007bff;
 }
+
 .endereco-correspondencia-container {
   background-color: #f0f8ff;
   border: 1px solid #007bff;
@@ -421,7 +419,6 @@ input[type="checkbox"] {
   max-width: none;
 }
 
-
 .checkbox-endereco-wrapper {
   margin-top: 1rem;
   margin-bottom: 2rem;
@@ -431,36 +428,29 @@ input[type="checkbox"] {
   margin-bottom: 1rem;
 }
 
-/* Barra azul no topo do conteúdo (logo abaixo do menu lateral) */
 .header-bar {
   height: 50px;
   background: #009fdf;
-
-  /* passa a ser FIXA na viewport */
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;          /* garante 100 % de largura */
-  z-index: 1100;     /* acima de todo o restante */
+  right: 0;
+  z-index: 1100;
 }
 
-
-/* --- faixa dos botões fixos -------------------------------------------------*/
 .header-actions {
-  position: fixed;      /* fica presa no topo também          */
-  top: 50px;            /* 50 px = altura da .header-bar      */
+  position: fixed;
+  top: 50px;
   left: 0;
   right: 0;
-  z-index: 1050;        /* logo abaixo da .header-bar         */
-
-  background: #009fdf;  /* mesma cor da barra                 */
+  z-index: 1050;
+  background: #009fdf;
   display: flex;
   justify-content: center;
   gap: 1.2rem;
   padding: 12px 0;
 }
 
-/* botões sobre fundo azul – branco para contraste */
 .header-actions .header-btn {
   background: #ffffff;
   color: #0078c9;
@@ -477,74 +467,125 @@ input[type="checkbox"] {
   background: #cce9ff;
   border-color: #cce9ff;
 }
-/* ──────────────────────────────────────────────────────────────── */
-/* LISTAGEM PADRÃO (empresas, pessoas, etc.)                       */
-/* ──────────────────────────────────────────────────────────────── */
 
-.listing-wrapper        { width: 100%; max-width: 1100px; }
-
-.listing-table          { width: 100%; border-collapse: collapse; }
-.listing-table thead tr { background: #eaf3fc; }
+/* tabela base para todos os listings */
+.listing-table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
 .listing-table th,
 .listing-table td {
   padding: 8px 10px;
   font-size: 0.95rem;
-}
-
-.listing-table th {
-  padding: 10px;
-  text-align: left;
-  font-weight: 600;
-  border-bottom: 2px solid #c9e2ff;
-}
-
-.listing-table th.actions,
-.listing-table td.actions {            /* coluna “Ações” centralizada   */
-  text-align: center;
-  width: 120px;
-}
-
-.listing-table td {
   border-bottom: 1px solid #e0e0e0;
 }
 
-/* botões pequenos (✏️   🗑️) ------------------------------------- */
-.btn.small-btn        { padding: 5px 12px; font-size: .9rem; border-radius: 6px; }
-.btn.small-btn.danger { background: #dc3545; color: #fff; }   /* lixeira */
-
-/* ───────────────── MODAL GENÉRICO (reuso em todas as listagens) ────────── */
-.modal-overlay{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.55);
-  display:flex; justify-content:center; align-items:center;
-  z-index:2000;
+.listing-table thead th {
+  font-weight: 600;
+  background: #eaf3fc;
+  border-bottom: 2px solid #c9e2ff;
 }
 
-.modal-box{
-  background:#fff;
-  border-radius:8px;
-  padding:24px;
-  width:400px; max-width:90%;
-  box-shadow:0 4px 18px rgba(0,0,0,.3);
+.listing-table th.center,
+.listing-table td.center {
+  text-align: center;
 }
 
-.modal-box h3{margin-top:0}
-.modal-actions{text-align:right;margin-top:4px}
-.modal-actions .btn{min-width:110px}
-/* ------------------------------------------------------------------------ */
-/* todas as células de ações viram flex‑linha com espaçamento uniforme */
-td.actions-cell{
-  display:flex;
-  justify-content:center;
-  gap:10px;           /* ajuste o valor conforme desejar */
+.listing-table .no-data {
+  text-align: center;
+  padding: 22px 0;
+  color: #606060;
+  font-style: italic;
 }
-/* === buttons inside action-group (tabelas de listagem) === */
+
+.btn.small-btn {
+  padding: 5px 12px;
+  font-size: .9rem;
+  border-radius: 6px;
+}
+
+.btn.small-btn.danger {
+  background: #dc3545;
+  color: #fff;
+}
+
+.btn.small-btn.info {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.btn.small-btn.info:hover {
+  filter: brightness(0.9);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 420px;
+  max-width: 92%;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+.modal-box h3 {
+  margin: 0 0 12px;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.modal-actions {
+  text-align: right;
+  margin-top: 18px;
+}
+
+td.actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
 .action-group {
   display: inline-flex;
-  gap: 6px;           /* distância horizontal entre os botões */
+  gap: 6px;
 }
 
 .action-group .btn.small-btn {
-  padding: 4px 8px;   /* mantém compacto */
+  padding: 4px 8px;
 }
+/* dá um espaçamento de 8 px entre QUALQUER botão pequeno que venha depois de outro */
+.listing-table .btn.small-btn + .btn.small-btn {
+  margin-left: 8px;
+}
+.action-cell {               /* última coluna da tabela */
+  text-align: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;                  /* ← espaçamento entre os botões */
+}
+.welcome-wrapper {
+  max-width: 800px;
+  margin: 80px auto;
+  text-align: center;
+  padding: 40px 24px;
+  border-radius: 16px;
+  background: #f7fbff;
+  box-shadow: 0 6px 20px rgba(0,0,0,.08);
+}
+.welcome-title { font-size: 2.2rem; margin-bottom: 18px; color:#004c97; }
+.welcome-text  { font-size: 1.1rem; line-height: 1.5; color:#374151; }
