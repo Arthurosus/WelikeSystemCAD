@@ -417,6 +417,7 @@ input[type="checkbox"] {
   gap: 1rem;
   width: 100%;
   max-width: none;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 }
 
 .checkbox-endereco-wrapper {
@@ -589,3 +590,11 @@ td.actions-cell {
 }
 .welcome-title { font-size: 2.2rem; margin-bottom: 18px; color:#004c97; }
 .welcome-text  { font-size: 1.1rem; line-height: 1.5; color:#374151; }
+
+/* grade de 2 colunas auto-ajustável  —  usa onde quiser */
+.grid-two{
+  display:grid;
+  gap:1rem;
+  /* cada coluna mínimo 250 px, expande igual */
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}

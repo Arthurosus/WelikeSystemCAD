@@ -1,14 +1,21 @@
-from pydantic_settings import BaseSettings
+# app/core/config.py
+# ——————————————————————————————————————————————
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    database_url: str
-    jwt_secret_key: str
-    jwt_algorithm: str
-    jwt_expiration_minutes: int
+    # *** Obrigatórios ***
+    DATABASE_URL:            str
+    JWT_SECRET_KEY:          str
+    JWT_ALGORITHM:           str = "HS256"
+    JWT_EXPIRATION_MINUTES:  int = 60
 
-    model_config = {
-        "env_file": ".env",          # lê backend/.env
-        "case_sensitive": False,
-    }
+    # *** Configuração para ler o .env ***
+    # extra="allow" → quaisquer chaves a mais no .env
+    #                 são simplesmente ignoradas (não causam erro).
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="allow",
+    )
 
+# Instância única usada no projeto inteiro
 settings = Settings()

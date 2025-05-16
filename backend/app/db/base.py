@@ -1,8 +1,16 @@
-# app/db/base.py
-from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy import create_engine
-from app.core.config import settings
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-engine = create_engine(settings.database_url, pool_pre_ping=True)
+from app.core.config import settings   # ← instância do Settings
+
+# ——————————————————————————————————————————————
+# Use o atributo *caixa‑ALTA* definido no Settings
+# ——————————————————————————————————————————————
+engine = create_engine(
+    settings.DATABASE_URL,   # <— era settings.database_url
+    pool_pre_ping=True,
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 Base = declarative_base()

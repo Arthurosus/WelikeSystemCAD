@@ -17,7 +17,7 @@ export default function WelcomePage() {
                 <div className="header-bar" />
 
                 <div className="welcome-wrapper">
-                    <h1 className="welcome-title">👋 Seja bem‑vindo à Welike System!</h1>
+                    <h1 className="welcome-title">👋 Seja bem‑vindo à Welike One!</h1>
                     <p className="welcome-text">
                         Use o menu à esquerda para navegar entre cadastros e listagens.
                     </p>

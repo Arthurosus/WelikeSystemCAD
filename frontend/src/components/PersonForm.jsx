@@ -276,11 +276,10 @@ export default function PersonForm({
                         ["Nome", "nome"],
                         ["Data de Nascimento", "dtNascimento"],
                         ["Sexo", "sexo"],
-                        ["Nome da Mãe", "mae"],
                         ["Email", "email"],
                         ["CPF", "cpf"],
                         ["RG", "rg"],
-                        ["RNE", "rne"],
+                        ["RNE (para estrangeiros)", "rne"],
                     ].map(([lbl, n]) => (
                         <div key={n} className="input-group">
                             <label>{lbl}</label>
