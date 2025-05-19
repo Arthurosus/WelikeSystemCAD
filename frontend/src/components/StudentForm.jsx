@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useMemo, memo } from "react";
+import React, {
+    useState,
+    useEffect,
+    useMemo,
+    useRef,
+    memo,
+} from "react";
 import axios from "axios";
 
 const API_BASE_URL =
     process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 const COURSE_OPTIONS = ["Fluency", "Teens", "VIP", "Travel", "Outros"];
+const EMP_OPTIONS = ["Cláudio", "Flávio", "Marcelo"];
 
 /* ---------- estado vazio padrão ---------- */
 const DEFAULT_DATA = {
@@ -36,6 +43,11 @@ const DEFAULT_DATA = {
     valorParcelaDesconto: "",
     regrasDesconto: "",
 
+    /* etapa 4 (imagem + autor) */
+    fotoFile: null,
+    fotoPreviewURL: "",
+    cadastroPor: "",
+
     /* endereço do contratante */
     enderecoCTR: {
         formato: "brasil",
@@ -53,17 +65,23 @@ const DEFAULT_DATA = {
 };
 
 function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
+    /* -------------------------------- state -------------------------------- */
     const [step, setStep] = useState(1);
     const [alunoEhContratante, setAlunoEhContratante] = useState(false);
     const [formData, setFormData] = useState({ ...DEFAULT_DATA, ...initialData });
 
-    /* -------- auto-complete aluno -------- */
+    /* webcam refs/estado */
+    const [camOn, setCamOn]   = useState(false);
+    const [stream, setStream] = useState(null);
+    const videoRef  = useRef(null);
+    const canvasRef = useRef(null);
+
+    /* auto-complete pessoa */
     const [pessoas, setPessoas] = useState([]);
     const [buscaPessoa, setBuscaPessoa] = useState("");
     const [pessoaSel, setPessoaSel] = useState(null);
 
-    useEffect(() => setFormData({ ...DEFAULT_DATA, ...initialData }), [initialData]);
-
+    /* ------ carregar pessoas -------- */
     useEffect(() => {
         (async () => {
             try {
@@ -75,12 +93,21 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
         })();
     }, []);
 
+    /* aplicar initialData (edição) */
+    useEffect(() => {
+        setFormData({ ...DEFAULT_DATA, ...initialData });
+    }, [initialData]);
+
+    /* lista filtrada p/ autocomplete */
     const pessoasFiltradas = useMemo(
-        () => pessoas.filter((p) => p.nome.toLowerCase().includes(buscaPessoa.toLowerCase())),
+        () =>
+            pessoas.filter((p) =>
+                p.nome.toLowerCase().includes(buscaPessoa.toLowerCase())
+            ),
         [pessoas, buscaPessoa]
     );
 
-    /*   se aluno == contratante copiar dados básicos   */
+    /* se “Aluno é contratante” copiar dados básicos */
     useEffect(() => {
         if (alunoEhContratante && pessoaSel) {
             setFormData((f) => ({
@@ -94,7 +121,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
         }
     }, [alunoEhContratante, pessoaSel]);
 
-    /* -------------- CEP / ZIP lookup -------------- */
+    /* ------------------------- CEP / ZIP lookup ------------------------- */
     const buscarCEP = async () => {
         if (formData.mesmoEndCTR || formData.enderecoCTR.formato !== "brasil") return;
         const cep = formData.enderecoCTR.cep?.replace(/\D/g, "");
@@ -138,7 +165,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
         } catch {/* ignore */}
     };
 
-    /* -------------- change helpers -------------- */
+    /* ------------------------- handlers ------------------------- */
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
@@ -162,18 +189,79 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
         }));
     };
 
+    /* ------------------------- upload / preview ------------------------- */
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!["image/jpeg", "image/jpg"].includes(file.type)) {
+            alert("Apenas imagens JPG/JPEG são permitidas.");
+            return;
+        }
+        const preview = URL.createObjectURL(file);
+        setFormData((p) => ({ ...p, fotoFile: file, fotoPreviewURL: preview }));
+    };
+
+    const removeImage = () => {
+        if (formData.fotoPreviewURL) URL.revokeObjectURL(formData.fotoPreviewURL);
+        setFormData((p) => ({ ...p, fotoFile: null, fotoPreviewURL: "" }));
+    };
+
+    /* ------------------------- webcam ------------------------- */
+    const startCamera = async () => {
+        try {
+            const media = await navigator.mediaDevices.getUserMedia({ video: true });
+            setStream(media);  // salva stream
+            setCamOn(true);    // força render do <video>
+        } catch {
+            alert("Não foi possível acessar a webcam.");
+        }
+    };
+
+    /* quando <video> existir, conecta stream */
+    useEffect(() => {
+        if (camOn && videoRef.current && stream) {
+            videoRef.current.srcObject = stream;
+        }
+    }, [camOn, stream]);
+
+    const stopCamera = () => {
+        stream?.getTracks().forEach((t) => t.stop());
+        setStream(null);
+        setCamOn(false);
+    };
+
+    const takePhoto = () => {
+        const video = videoRef.current;
+        if (!video) return;
+        const canvas = canvasRef.current;
+        canvas.width  = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+        canvas.toBlob(
+            (blob) => {
+                if (!blob) return;
+                const file = new File([blob], "webcam.jpg", { type: "image/jpeg" });
+                const preview = URL.createObjectURL(file);
+                setFormData((p) => ({ ...p, fotoFile: file, fotoPreviewURL: preview }));
+            },
+            "image/jpeg",
+            0.9
+        );
+        stopCamera();
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit?.(formData);
     };
 
-    /* ---------- rótulos das etapas ---------- */
+    /* ------------------------- rótulos etapas ------------------------- */
     const steps = ["Aluno", "Contrato & Situação", "Pagamento", "Finalização"];
-
-    /* ====================================================== */
+    /* ============================== JSX =============================== */
     return (
         <form className="form-box" onSubmit={handleSubmit}>
-            {/* cabeçalho + barra */ }
+            {/* cabeçalho + barra de progresso */}
             <div className="form-header">
                 <h2>{mode === "edit" ? "Edição de Aluno" : "Cadastro de Aluno"}</h2>
                 <span className="step-info">Etapa {step} de 4</span>
@@ -188,6 +276,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
             {/* ===================== ETAPA 1 ===================== */}
             {step === 1 && (
                 <div className="form-step grid">
+                    {/* busca aluno */}
                     <div className="input-group">
                         <label>Buscar Aluno</label>
                         <input
@@ -247,7 +336,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
                 </div>
             )}
 
-            {/* ===================== ETAPA 2 (Contrato + Situação) ===================== */}
+            {/* ===================== ETAPA 2 (Contrato & Situação) ===================== */}
             {step === 2 && (
                 <div className="form-step grid-two">
                     {/* contrato */}
@@ -279,7 +368,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
                         />
                     </div>
 
-                    {/* se contratante ≠ aluno, mostra campos + endereço */}
+                    {/* contratante ≠ aluno */}
                     {!alunoEhContratante && (
                         <>
                             {[
@@ -301,7 +390,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
                                 </div>
                             ))}
 
-                            {/* toggle endereço = mesmo */}
+                            {/* endereço = mesmo? */}
                             <div
                                 className="input-group checkbox large-checkbox colored"
                                 style={{ gridColumn: "1 / -1" }}
@@ -317,7 +406,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
                                 </label>
                             </div>
 
-                            {/* endereço contratante se necessário */}
+                            {/* endereço contratante */}
                             {!formData.mesmoEndCTR && (
                                 <div
                                     className="address-grid"
@@ -413,7 +502,7 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
                         </>
                     )}
 
-                    {/* -------- blocos de Situação (checkboxes) -------- */}
+                    {/* Situação */}
                     {[
                         ["nivelamento", "Nivelamento"],
                         ["emancipadoCTR", "Emancipado"],
@@ -439,14 +528,25 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
                 <div className="form-step grid">
                     <h4
                         className="section-title"
-                        style={{ gridColumn: "1 / -1", margin: "0 0 0.75rem 0", fontSize: "20px" }} > Plano de Pagamento
+                        style={{
+                            gridColumn: "1 / -1",
+                            margin: "0 0 0.75rem 0",
+                            fontSize: "20px",
+                        }}
+                    >
+                        Plano de Pagamento
                     </h4>
+
                     {[
                         ["taxaMatricula", "Taxa de Matrícula (R$)", "number"],
                         ["materialDidatico", "Material Didático (R$)", "number"],
                         ["numeroParcelas", "Número de Parcelas", "number"],
                         ["valorParcela", "Valor da Parcela (R$)", "number"],
-                        ["valorParcelaDesconto", "Valor da Parcela c/ Desconto", "number"],
+                        [
+                            "valorParcelaDesconto",
+                            "Valor da Parcela c/ Desconto",
+                            "number",
+                        ],
                     ].map(([n, lbl, type]) => (
                         <div key={n} className="input-group">
                             <label>{lbl}</label>
@@ -475,22 +575,137 @@ function StudentForm({ mode = "create", initialData = {}, onSubmit }) {
                 </div>
             )}
 
-            {/* ===================== ETAPA 4 (placeholder) ===================== */}
+            {/* ===================== ETAPA 4 (Foto + autor) ===================== */}
             {step === 4 && (
                 <div className="form-step">
-                    <p>Etapa reservada para confirmações ou uploads futuros.</p>
+                    {/* foto */}
+                    <h4 style={{ marginBottom: "0.75rem" }}>
+                        Foto do Aluno / Contratante
+                    </h4>
+
+                    {formData.fotoPreviewURL && (
+                        <div
+                            style={{
+                                width: 180,
+                                height: 180,
+                                overflow: "hidden",
+                                borderRadius: 8,
+                                marginBottom: 12,
+                            }}
+                        >
+                            <img
+                                src={formData.fotoPreviewURL}
+                                alt="preview"
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                        </div>
+                    )}
+
+                    {camOn && (
+                        <>
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                style={{ width: 320, borderRadius: 8 }}
+                            />
+                            <div style={{ marginTop: 8 }}>
+                                <button
+                                    type="button"
+                                    className="btn continue"
+                                    onClick={takePhoto}
+                                >
+                                    Capturar
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn back"
+                                    style={{ marginLeft: 8 }}
+                                    onClick={stopCamera}
+                                >
+                                    Fechar
+                                </button>
+                            </div>
+                        </>
+                    )}
+
+                    <canvas ref={canvasRef} style={{ display: "none" }} />
+
+                    {!camOn && (
+                        <div style={{ marginBottom: 12 }}>
+                            <label htmlFor="fotoUpload" className="btn continue">
+                                Enviar JPG
+                            </label>
+                            <input
+                                id="fotoUpload"
+                                type="file"
+                                accept="image/jpeg"
+                                style={{ display: "none" }}
+                                onChange={handleFileChange}
+                            />
+                            <span style={{ margin: "0 8px" }}>ou</span>
+                            <button
+                                type="button"
+                                className="btn continue"
+                                onClick={startCamera}
+                            >
+                                Usar Webcam
+                            </button>
+
+                            {formData.fotoPreviewURL && (
+                                <button
+                                    type="button"
+                                    className="btn danger"
+                                    style={{ marginLeft: 8 }}
+                                    onClick={removeImage}
+                                >
+                                    Remover Foto
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* cadastro por */}
+                    <div className="input-group" style={{ maxWidth: 300 }}>
+                        <label>Cadastro realizado por:</label>
+                        <select
+                            className="input"
+                            name="cadastroPor"
+                            value={formData.cadastroPor}
+                            onChange={handleChange}
+                        >
+                            <option value="">Selecione…</option>
+                            {EMP_OPTIONS.map((emp) => (
+                                <option key={emp} value={emp}>
+                                    {emp}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <p style={{ marginTop: 16 }}>
+                        Uploads ou confirmações adicionais poderão ser adicionados aqui
+                        futuramente.
+                    </p>
                 </div>
             )}
 
             {/* navegação */}
             <div className="navigation-buttons">
                 {step > 1 && (
-                    <button type="button" className="btn back" onClick={() => setStep(step - 1)}>
+                    <button
+                        type="button"
+                        className="btn back"
+                        onClick={() => setStep(step - 1)}
+                    >
                         Voltar
                     </button>
                 )}
                 {step < 4 && (
-                    <button type="button" className="btn continue" onClick={() => setStep(step + 1)}>
+                    <button
+                        type="button"
+                        className="btn continue"
+                        onClick={() => setStep(step + 1)}
+                    >
                         Continuar
                     </button>
                 )}
