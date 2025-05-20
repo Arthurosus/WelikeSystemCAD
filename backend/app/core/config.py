@@ -1,21 +1,28 @@
-# app/core/config.py
-# ——————————————————————————————————————————————
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    # *** Obrigatórios ***
-    DATABASE_URL:            str
-    JWT_SECRET_KEY:          str
-    JWT_ALGORITHM:           str = "HS256"
-    JWT_EXPIRATION_MINUTES:  int = 60
+    # ---- banco central / root ------------
+    db_user: str
+    db_pass: str
+    db_host: str
+    db_port: int = 3306
+    central_db: str                 # nome do BD “central”
+    database_url_root: str          # string sem o nome do BD
 
-    # *** Configuração para ler o .env ***
-    # extra="allow" → quaisquer chaves a mais no .env
-    #                 são simplesmente ignoradas (não causam erro).
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        extra="allow",
-    )
+    # ---- jwt -----------------------------
+    jwt_secret_key: str
+    jwt_algorithm: str = "HS256"
+    jwt_expiration_minutes: int = 60
 
-# Instância única usada no projeto inteiro
+    model_config = SettingsConfigDict(env_file=".env", extra="allow")
+
+    # propriedades dinâmicas ----------------
+    @property
+    def database_url(self) -> str:
+        """URL completa do banco central."""
+        return (
+            f"mysql+pymysql://{self.db_user}:{self.db_pass}"
+            f"@{self.db_host}:{self.db_port}/{self.central_db}"
+        )
+
 settings = Settings()
