@@ -1,53 +1,44 @@
 """
-Alembic environment file – carrega as models do projeto e expõe o MetaData
-para geração / execução de migrações.
+Script de execução do Alembic.
 
-Executar:
-    alembic revision --autogenerate -m "minha mensagem"
-    alembic upgrade head
+– Lê a URL do banco do objeto settings (já populado pelo app/core/config.py)
+– Inclui todos os modelos para que o autogenerate enxergue as tabelas
 """
 
 from __future__ import annotations
 
-import os
-import sys
+import logging
 from logging.config import fileConfig
 from pathlib import Path
-
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-# ──────────────────────────────────────────────────────────────
-# 1) Permitir import "from app.…" mesmo quando chamado via CLI
-# ──────────────────────────────────────────────────────────────
-PROJECT_ROOT = Path(__file__).resolve().parents[1]  # …/backend
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.append(str(PROJECT_ROOT))
+# ------------------------------------------------------------------
+# 1. Carrega settings e modelos
+# ------------------------------------------------------------------
+import sys
+sys.path.append(str(Path(__file__).resolve().parents[1]))  # adiciona /backend ao PYTHONPATH
 
-# ──────────────────────────────────────────────────────────────
-# 2) Import das configs e models
-# ──────────────────────────────────────────────────────────────
-from app.core.config import settings        # noqa: E402
-from app.db.base import Base                # noqa: E402  (contém metadata)
-from app import models                      # noqa: F401,E402  (importa tudo p/ registrar)
+from app.core.config import settings                    # noqa: E402
+from app.db.base import Base                            # noqa: E402  (contém metadata)
 
-# ──────────────────────────────────────────────────────────────
-# 3) Configuração da seção [alembic] do alembic.ini (fileConfig)
-# ──────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# 2. Config Alembic / Logging
+# ------------------------------------------------------------------
 config = context.config
-fileConfig(config.config_file_name)  # habilita logging do Alembic
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+logger = logging.getLogger("alembic.env")
 
-# Banco de dados raiz (central)
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# ←<<<<  ALTERAÇÃO AQUI  >>>>>>→
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# ------------------------------------------------------------------
 
-target_metadata = Base.metadata  # permite autogenerate()
+target_metadata = Base.metadata
 
 
-# ──────────────────────────────────────────────────────────────
-# 4) Rotinas padrão do Alembic
-# ──────────────────────────────────────────────────────────────
 def run_migrations_offline() -> None:
-    """Gera um script SQL (modo *offline*)."""
+    """Modo 'offline': gera apenas SQL."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -55,6 +46,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
+        compare_server_default=True,
     )
 
     with context.begin_transaction():
@@ -62,9 +54,9 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Aplica migrações direto no banco (modo *online*)."""
+    """Modo 'online': conecta-se ao banco e executa DDL."""
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
@@ -73,14 +65,14 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            compare_type=True,   # detecta alterações no tipo das colunas
+            compare_type=True,
+            compare_server_default=True,
         )
 
         with context.begin_transaction():
             context.run_migrations()
 
 
-# Alembic escolhe automaticamente se está em modo offline/online
 if context.is_offline_mode():
     run_migrations_offline()
 else:
