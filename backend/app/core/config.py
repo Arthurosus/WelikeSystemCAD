@@ -1,5 +1,4 @@
-# app/core/config.py
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # ----- conexão central -------------------------------------------------
@@ -18,6 +17,15 @@ class Settings(BaseSettings):
     jwt_expiration_minutes: int = 60
 
     # ----------------------------------------------------------------------
+    # Configuração do Pydantic para aceitar variáveis extras no .env
+    # ----------------------------------------------------------------------
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="allow"  # ← permite variáveis extras no .env sem quebrar
+    )
+
+    # ----------------------------------------------------------------------
     # Pydantic – variáveis que **não** forem passadas no .env
     # serão montadas automaticamente aqui.
     # ----------------------------------------------------------------------
@@ -33,4 +41,4 @@ class Settings(BaseSettings):
             )
 
 # instância global
-settings = Settings(_env_file=".env", _env_file_encoding="utf-8")
+settings = Settings()
