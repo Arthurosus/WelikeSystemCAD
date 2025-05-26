@@ -1,14 +1,15 @@
+# app/models/__init__.py
 """
-Importa todos os modelos para que o SQLAlchemy tenha o metadata completo.
-Esses imports servem apenas para efeitos colaterais (registro das tabelas).
+Reúne todas as classes de modelo em um único local e expõe `Base`
+para que possa ser importado como `from app import models; models.Base`.
 """
 
-from app.models.company import (  # noqa: F401
-    TipoEmpresa,
-    RegimeEmpresarial,
-    EstadoEmpresa,
-    Empresa,
-    Telefone,
-    RedeSocial,
-    Endereco,
-)
+from app.db.base_class import Base        #  ← agora disponível!
+from .empresa import Empresa              #  ←  seus modelos reais
+# from .outro_modelo import OutroModelo   #  adicione os próximos aqui
+
+__all__ = [
+    "Base",
+    "Empresa",
+    # "OutroModelo",
+]

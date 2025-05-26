@@ -1,5 +1,5 @@
 # app/db/deps.py
-from app.db.base import SessionLocal
+from app.db.database import SessionLocal
 from contextlib import contextmanager
 
 @contextmanager

@@ -2,7 +2,7 @@
 Declarative base compartilhada por todos os modelos.
 
 Coloque aqui _apenas_ o declarative-base – a engine,
-SessionLocal e afins ficam em app/db/session.py (ou base.py)
+SessionLocal e afins ficam em app/db/session.py (ou database.py)
 """
 
 from sqlalchemy.orm import DeclarativeBase

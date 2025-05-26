@@ -20,7 +20,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parents[1]))  # adiciona /backend ao PYTHONPATH
 
 from app.core.config import settings                    # noqa: E402
-from app.db.base import Base                            # noqa: E402  (contém metadata)
+from app.db.database import Base                            # noqa: E402  (contém metadata)
 
 # ------------------------------------------------------------------
 # 2. Config Alembic / Logging
