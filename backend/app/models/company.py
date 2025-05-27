@@ -67,12 +67,13 @@ class Empresa(Base):
 class Telefone(Base):
     __tablename__ = "telefones"
 
-    id         = Column(Integer, primary_key=True, index=True)
-    numero     = Column(String(20), nullable=False)
-    principal  = Column(Boolean, default=False)
-    whatsapp   = Column(Boolean, default=False)
-    empresa_id = Column(Integer, ForeignKey("empresas.id"))
-    empresa    = relationship("Empresa", back_populates="telefones")
+    id          = Column(Integer, primary_key=True, index=True)
+    codigo_pais = Column(String(5), default="+55")          # ← nova coluna
+    numero      = Column(String(20), nullable=False)
+    principal   = Column(Boolean, default=False)
+    whatsapp    = Column(Boolean, default=False)
+    empresa_id  = Column(Integer, ForeignKey("empresas.id"))
+    empresa     = relationship("Empresa", back_populates="telefones")
 
 
 class RedeSocial(Base):

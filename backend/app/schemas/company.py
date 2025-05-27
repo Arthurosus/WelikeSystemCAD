@@ -2,7 +2,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 
-# ── sub‑schemas (caso precise) ───────────────────────────────────
+# ── sub-schemas ────────────────────────────────────────────────────
 class TelefoneBase(BaseModel):
     codigo_pais: str = "+55"
     numero: str
@@ -31,13 +31,14 @@ class RedesSociaisBase(BaseModel):
     tiktok: Optional[str] = None
 
 
-# ── schemas principais ───────────────────────────────────────────
+# ── schemas principais ────────────────────────────────────────────
 class EmpresaBase(BaseModel):
     codigo: str
     sigla: str
     razao_social: str
     cnpj: str
     nome_fantasia: Optional[str] = None
+    nome_site: Optional[str] = None          # ← ADICIONADO
     inscricao_municipal: Optional[str] = None
     inscricao_estadual: Optional[str] = None
     exibir_site: bool = False
@@ -60,4 +61,11 @@ class EmpresaResponse(EmpresaBase):
     redes_sociais: RedesSociaisBase | None = None
 
     class Config:
-        from_attributes = True  # atualizado para Pydantic v2
+        from_attributes = True
+
+# ── resposta paginada ──────────────────────────────────────────────
+class PaginatedEmpresas(BaseModel):
+    total: int
+    skip: int
+    limit: int
+    items: List[EmpresaResponse]
