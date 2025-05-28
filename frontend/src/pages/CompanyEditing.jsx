@@ -1,43 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import HeaderActions from "../components/HeaderActions";
 import CompanyForm from "../components/CompanyForm";
-import axios from "axios";
+import { CompanyService } from "../services/companyService";
 
 export default function CompanyEditing() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [cadastroAberto, setCadastroAberto] = useState(false);
   const [empresa, setEmpresa] = useState(null);
 
   useEffect(() => {
     (async () => {
-      // ‑‑ MOCK ‑‑ use dados fixos
-      setEmpresa({
-        id,
-        codigo:"EMP123", cnpj:"12.345.678/0001‑00", sigla:"EMP",
-        razaoSocial:"Empresa Exemplo", nomeFantasia:"Exemplo LTDA",
-        tipoEmpresa:"1", regimeEmpresarial:"1", estadoEmpresa:"1",
-        telefones:[{codigo_pais:"+55",numero:"11999990000",principal:true,whatsapp:true}],
-        redesSociais:{email:"contato@exemplo.com"},
-        endereco:{formato:"brasil",cidade:"São Paulo",estado:"SP",pais:"Brasil"}
-      });
-
-      /* // real:
-      const { data } = await axios.get(`http://127.0.0.1:8000/empresas/${id}`);
+      const { data } = await CompanyService.get(id);
       setEmpresa(data);
-      */
     })();
   }, [id]);
 
-  const handleUpdate = async (data) => {
-    console.log("SALVAR (mock):", data);
-    /* // real:
-    await axios.put(`http://127.0.0.1:8000/empresas/${id}`, data);
-    */
+  const handleUpdate = async (payload) => {
+    await CompanyService.update(id, payload);
+    navigate("/empresas");
   };
 
-  if (!empresa) return null;   // ou um spinner
+  if (!empresa) return null; // spinner opcional
 
   return (
       <div className="main-layout">
@@ -46,11 +32,7 @@ export default function CompanyEditing() {
           <HeaderActions categoria="empresas" />
           <div className="header-bar" />
           <div className="registration-container">
-            <CompanyForm
-                mode="edit"
-                initialData={empresa}
-                onSubmit={handleUpdate}
-            />
+            <CompanyForm mode="edit" initialData={empresa} onSubmit={handleUpdate} />
           </div>
         </div>
       </div>
