@@ -1,86 +1,92 @@
-"""
-Esquemas (Pydantic) para a entidade Empresa e seus agregados
-"""
+# app/schemas/company.py
+from typing import List, Optional, Union
 
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
-# ────────────────────────── blocos auxiliares ──────────────────────────
+# ───────────────────────────── TELEFONE ──────────────────────────────
 class TelefoneBase(BaseModel):
     codigo_pais: str = "+55"
     numero: str
     principal: bool = False
-    whatsapp: bool  = False
+    whatsapp: bool = False
 
 
+# ─────────────────────────── REDES SOCIAIS ───────────────────────────
 class RedesSociaisBase(BaseModel):
-    email:     Optional[str] = None
+    email: Optional[str] = None
     instagram: Optional[str] = None
-    twitter:   Optional[str] = None
-    tiktok:    Optional[str] = None
+    twitter: Optional[str] = None
+    tiktok: Optional[str] = None
 
 
+# ───────────────────────────── ENDEREÇO ──────────────────────────────
 class EnderecoBase(BaseModel):
-    formato:     str           = "brasil"      # "brasil" | "internacional"
-    cep:         Optional[str] = None
-    zip:         Optional[str] = None          # usado p/ formato internacional
-    rua:         Optional[str] = None
-    numero:      Optional[str] = None
+    formato: str = Field(default="brasil", pattern="^(brasil|internacional)$")
+    cep: Optional[str] = None
+    zip: Optional[str] = None            # usado quando formato = internacional
+    rua: Optional[str] = None
+    numero: Optional[str] = None
     complemento: Optional[str] = None
-    bairro:      Optional[str] = None
-    cidade:      Optional[str] = None
-    estado:      Optional[str] = None
-    regiao:      Optional[str] = None
-    pais:        Optional[str] = None
-    latitude:    Optional[float] = None
-    longitude:   Optional[float] = None
-    link_maps:   Optional[str] = Field(None, alias="linkMaps")
+    bairro: Optional[str] = None
+    cidade: Optional[str] = None
+    estado: Optional[str] = None
+    regiao: Optional[str] = None
+    pais: Optional[str] = None
+    latitude:  Optional[Union[float, str]] = None
+    longitude: Optional[Union[float, str]] = None
+    link_maps: Optional[str] = None
+
+    # ─── converte "" → None antes da validação de tipo ───
+    @field_validator("latitude", "longitude", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        return None if v in ("", None) else v
 
 
-# ───────────────────── entidade principal (empresa) ────────────────────
+# ───────────────────────────── EMPRESA ───────────────────────────────
 class EmpresaBase(BaseModel):
-    codigo:              str
-    sigla:               str
-    razao_social:        str
-    cnpj:                str
-    nome_fantasia:       Optional[str] = None
-    nome_site:           Optional[str] = None
+    codigo: str
+    cnpj: str
     inscricao_municipal: Optional[str] = None
-    inscricao_estadual:  Optional[str] = None
-    exibir_site:         bool = False
+    inscricao_estadual: Optional[str] = None
+    razao_social: str
+    nome_fantasia: Optional[str] = None
+    sigla: Optional[str] = None
+    nome_site: Optional[str] = None
 
-    # relações look-up (enviamos **nome**, não id)
-    tipo_empresa:        str
-    regime_empresarial:  str
-    estado_empresa:      str
+    tipo_empresa: str = "Própria"
+    regime_empresarial: str = "Simples"
+    estado_empresa: str = "Ativa"
+
+    exibir_site: bool = False
 
 
+# -------- payloads de entrada ---------------------------------------
 class EmpresaCreate(EmpresaBase):
-    telefones:     List[TelefoneBase]
-    endereco:      EnderecoBase
+    telefones: List[TelefoneBase]
     redes_sociais: RedesSociaisBase
+    endereco: EnderecoBase
 
 
 class EmpresaUpdate(EmpresaCreate):
-    """Mesmo payload do create, reaproveitado para edição."""
+    """Para este projeto, update exige o mesmo payload de create."""
     pass
 
 
+# -------- respostas da API ------------------------------------------
 class EmpresaResponse(EmpresaBase):
-    id:            int
-    telefones:     List[TelefoneBase]
-    endereco:      EnderecoBase
+    id: int
+    telefones: List[TelefoneBase]
     redes_sociais: RedesSociaisBase
+    endereco: EnderecoBase
 
-    class Config:
-        orm_mode                       = True
-        allow_population_by_field_name = True
+    model_config = {"from_attributes": True}  # habilita ORM mode (Pydantic v2)
 
 
-# ─────────────────────────── paginação padrão ──────────────────────────
+# ─────────────────────────── PAGINAÇÃO ───────────────────────────────
 class PaginatedEmpresas(BaseModel):
     total: int
-    skip:  int
+    skip: int
     limit: int
     items: List[EmpresaResponse]
