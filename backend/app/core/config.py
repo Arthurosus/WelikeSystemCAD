@@ -1,44 +1,31 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+# app/core/config.py
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
+
 
 class Settings(BaseSettings):
-    # ----- conexão central -------------------------------------------------
-    db_user: str = "root"
-    db_pass: str = "Rtk3rzJZ8"
-    db_host: str = "localhost"
-    db_port: int = 3306
-    central_db: str = "central_system"
+    """
+    Carrega variáveis de ambiente do arquivo `.env`
+    (ou do ambiente do sistema). Todos os atributos
+    declarados aqui ficam disponíveis em `settings`.
+    """
 
-    # URL completa do banco central  (usada pelo SQLAlchemy)
-    database_url: str | None = None   # ← NOVO!
-
-    # ----- JWT -------------------------------------------------------------
-    jwt_secret_key: str = "super-secret"
+    # ---------- principais ----------
+    database_url: str                  # ex.: mysql+pymysql://user:pwd@localhost/welike_central
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 60
 
-    # ----------------------------------------------------------------------
-    # Configuração do Pydantic para aceitar variáveis extras no .env
-    # ----------------------------------------------------------------------
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="allow"  # ← permite variáveis extras no .env sem quebrar
+    # ---------- compatibilidade ----------
+    @property
+    def DATABASE_URL(self) -> str:     # mantém código legado funcionando
+        return self.database_url
+
+    # ---------- meta ----------
+    model_config = ConfigDict(
+        env_file=".env",       # lê variáveis a partir deste arquivo
+        extra="allow",         # ignora vars não declaradas
     )
 
-    # ----------------------------------------------------------------------
-    # Pydantic – variáveis que **não** forem passadas no .env
-    # serão montadas automaticamente aqui.
-    # ----------------------------------------------------------------------
-    def __init__(self, **values):
-        super().__init__(**values)
 
-        # se o usuário não definiu DATABASE_URL no .env, montamos
-        # a partir dos outros campos.
-        if self.database_url is None:
-            self.database_url = (
-                f"mysql+pymysql://{self.db_user}:{self.db_pass}"
-                f"@{self.db_host}:{self.db_port}/{self.central_db}"
-            )
-
-# instância global
 settings = Settings()

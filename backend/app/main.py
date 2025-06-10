@@ -1,38 +1,38 @@
 """
-Camada de API REST para Empresa – CRUD completo + paginação.
+API REST de Empresas – CRUD completo + paginação.
+Inclui:
+• CORS p/ React (localhost:3000)
+• Conversão zip→cep (caso o front use formato internacional)
+• Tratamento das redes sociais (1 registro por campo não-vazio)
 """
 
 from typing import List
 
-from fastapi import (
-    FastAPI,
-    Depends,
-    HTTPException,
-    Query,
-)
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
-from app import models
 from app.db.database import SessionLocal, engine_central
+from app import models
 from app.schemas import company as schemas
 
-# ───────────────────── inicialização ────────────────────────────
+
+# ────────────────── inicialização e CORS ──────────────────
 models.Base.metadata.create_all(bind=engine_central)
 
 app = FastAPI(title="WelikeSystemCAD – API")
 
-# CORS (frontend React roda em http://localhost:3000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
+    allow_origins=["http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
-# ───────────────────── dependência de sessão ────────────────────
+
+# ───────────── dependência de sessão de BD ────────────────
 def get_db():
     db = SessionLocal()
     try:
@@ -40,9 +40,9 @@ def get_db():
     finally:
         db.close()
 
-# ───────────────────── helpers internos ─────────────────────────
+
+# ─────────────── helpers internos ─────────────────────────
 def _tel_to_schema(t: models.Telefone) -> schemas.TelefoneBase:
-    """Converte Telefone SQLAlchemy → schema Pydantic."""
     return schemas.TelefoneBase(
         codigo_pais=t.codigo_pais or "+55",
         numero=t.numero,
@@ -52,7 +52,6 @@ def _tel_to_schema(t: models.Telefone) -> schemas.TelefoneBase:
 
 
 def _empresa_to_response(e: models.Empresa) -> schemas.EmpresaResponse:
-    """Converte Empresa + relações para o schema de saída."""
     return schemas.EmpresaResponse(
         id=e.id,
         codigo=e.codigo,
@@ -72,13 +71,30 @@ def _empresa_to_response(e: models.Empresa) -> schemas.EmpresaResponse:
         redes_sociais=e.redes_sociais.__dict__ if e.redes_sociais else None,
     )
 
-# ───────────────────────────── CRUD ─────────────────────────────
+
+def _add_redes_sociais(db: Session, empresa_id: int, rs_schema: schemas.RedesSociaisBase) -> None:
+    """
+    Converte o schema de redes sociais (campos email/instagram/twitter/tiktok)
+    em múltiplas linhas da tabela `redes_sociais`.
+    """
+    for campo, valor in rs_schema.dict().items():
+        if valor:  # descarta None / string vazia
+            db.add(
+                models.RedeSocial(
+                    empresa_id=empresa_id,
+                    tipo=campo,   # email | instagram | twitter | tiktok
+                    link=valor,
+                )
+            )
+
+
+# ────────────────────── rotas CRUD ────────────────────────
 @app.post("/empresas/", response_model=schemas.EmpresaResponse, status_code=201)
 def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db)):
     # look-ups
-    tipo   = db.query(models.TipoEmpresa).filter_by(nome=payload.tipo_empresa).first()
+    tipo   = db.query(models.TipoEmpresa      ).filter_by(nome=payload.tipo_empresa      ).first()
     regime = db.query(models.RegimeEmpresarial).filter_by(nome=payload.regime_empresarial).first()
-    estado = db.query(models.EstadoEmpresa).filter_by(nome=payload.estado_empresa).first()
+    estado = db.query(models.EstadoEmpresa    ).filter_by(nome=payload.estado_empresa    ).first()
     if not (tipo and regime and estado):
         raise HTTPException(400, "Tipo, regime ou estado inválidos")
 
@@ -98,20 +114,19 @@ def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db))
         estado_empresa=estado,
     )
     db.add(emp)
-    db.flush()  # garante emp.id para relacionamentos
+    db.flush()   # garante emp.id
 
     # telefones
     for tel in payload.telefones:
         db.add(models.Telefone(empresa_id=emp.id, **tel.dict()))
 
-    # endereço  (converte zip → cep se vier no formato internacional)
+    # endereço (remove 'zip' → usa 'cep' no modelo)
     end_dict = payload.endereco.dict()
-    if end_dict.get("zip"):
-        end_dict["cep"] = end_dict.pop("zip")
+    end_dict.pop("zip", None)
     db.add(models.Endereco(empresa_id=emp.id, **end_dict))
 
     # redes sociais
-    db.add(models.RedeSocial(empresa_id=emp.id, **payload.redes_sociais.dict()))
+    _add_redes_sociais(db, emp.id, payload.redes_sociais)
 
     # commit
     try:
@@ -155,24 +170,23 @@ def atualizar_empresa(
         setattr(emp, field, getattr(payload, field))
 
     # look-ups
-    emp.tipo_empresa = db.query(models.TipoEmpresa).filter_by(nome=payload.tipo_empresa).first()
+    emp.tipo_empresa       = db.query(models.TipoEmpresa      ).filter_by(nome=payload.tipo_empresa      ).first()
     emp.regime_empresarial = db.query(models.RegimeEmpresarial).filter_by(nome=payload.regime_empresarial).first()
-    emp.estado_empresa = db.query(models.EstadoEmpresa).filter_by(nome=payload.estado_empresa).first()
+    emp.estado_empresa     = db.query(models.EstadoEmpresa    ).filter_by(nome=payload.estado_empresa    ).first()
 
-    # substituir telefones
+    # telefones
     db.query(models.Telefone).filter_by(empresa_id=empresa_id).delete()
     for tel in payload.telefones:
         db.add(models.Telefone(empresa_id=empresa_id, **tel.dict()))
 
-    # substituir endereço & redes
-    db.query(models.Endereco).filter_by(empresa_id=empresa_id).delete()
+    # endereço & redes
+    db.query(models.Endereco  ).filter_by(empresa_id=empresa_id).delete()
     db.query(models.RedeSocial).filter_by(empresa_id=empresa_id).delete()
 
     end_dict = payload.endereco.dict()
-    if end_dict.get("zip"):
-        end_dict["cep"] = end_dict.pop("zip")
+    end_dict.pop("zip", None)
     db.add(models.Endereco(empresa_id=empresa_id, **end_dict))
-    db.add(models.RedeSocial(empresa_id=empresa_id, **payload.redes_sociais.dict()))
+    _add_redes_sociais(db, empresa_id, payload.redes_sociais)
 
     db.commit()
     db.refresh(emp)
@@ -186,10 +200,11 @@ def deletar_empresa(empresa_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Empresa deletada com sucesso"}
 
-# ───────────────────── listagem paginada ────────────────────────
+
+# ─────────────────── listagem paginada ──────────────────────
 @app.get("/empresas/", response_model=schemas.PaginatedEmpresas)
 def listar_empresas(
-    skip: int = Query(0, ge=0),
+    skip: int = Query(0,  ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
@@ -208,7 +223,8 @@ def listar_empresas(
         items=[_empresa_to_response(e) for e in rows],
     )
 
-# ─────────────────────── look-ups auxiliares ────────────────────
+
+# ───────────────────── look-ups auxiliares ───────────────────
 @app.get("/tipos_empresa/")
 def listar_tipos(db: Session = Depends(get_db)):
     return db.query(models.TipoEmpresa).order_by(models.TipoEmpresa.nome).all()
