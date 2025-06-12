@@ -1,9 +1,9 @@
 """
-API REST de Empresas – CRUD completo + paginação.
-Inclui:
-• CORS p/ React (localhost:3000)
-• Conversão zip→cep (caso o front use formato internacional)
-• Tratamento das redes sociais (1 registro por campo não-vazio)
+API REST de Empresas – CRUD + paginação.
+Corrige:
+• flush dentro do try/except  → devolve 409 (duplicado) em vez de 500
+• tratamento de redes sociais
+• CORS para http://localhost:3000
 """
 
 from typing import List
@@ -18,7 +18,7 @@ from app import models
 from app.schemas import company as schemas
 
 
-# ────────────────── inicialização e CORS ──────────────────
+# ─────────────── inicialização + CORS ────────────────
 models.Base.metadata.create_all(bind=engine_central)
 
 app = FastAPI(title="WelikeSystemCAD – API")
@@ -32,7 +32,7 @@ app.add_middleware(
 )
 
 
-# ───────────── dependência de sessão de BD ────────────────
+# ─────────────── dependência de sessão ───────────────
 def get_db():
     db = SessionLocal()
     try:
@@ -41,7 +41,7 @@ def get_db():
         db.close()
 
 
-# ─────────────── helpers internos ─────────────────────────
+# ──────────────── helpers internos ───────────────────
 def _tel_to_schema(t: models.Telefone) -> schemas.TelefoneBase:
     return schemas.TelefoneBase(
         codigo_pais=t.codigo_pais or "+55",
@@ -72,23 +72,20 @@ def _empresa_to_response(e: models.Empresa) -> schemas.EmpresaResponse:
     )
 
 
-def _add_redes_sociais(db: Session, empresa_id: int, rs_schema: schemas.RedesSociaisBase) -> None:
-    """
-    Converte o schema de redes sociais (campos email/instagram/twitter/tiktok)
-    em múltiplas linhas da tabela `redes_sociais`.
-    """
-    for campo, valor in rs_schema.dict().items():
-        if valor:  # descarta None / string vazia
+def _add_redes_sociais(db: Session, empresa_id: int, rs: schemas.RedesSociaisBase) -> None:
+    """Grava 0-N linhas na tabela `redes_sociais`."""
+    for campo, valor in rs.dict().items():
+        if valor:
             db.add(
                 models.RedeSocial(
                     empresa_id=empresa_id,
-                    tipo=campo,   # email | instagram | twitter | tiktok
+                    tipo=campo,
                     link=valor,
                 )
             )
 
 
-# ────────────────────── rotas CRUD ────────────────────────
+# ───────────────────── rota CREATE ────────────────────
 @app.post("/empresas/", response_model=schemas.EmpresaResponse, status_code=201)
 def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db)):
     # look-ups
@@ -98,7 +95,6 @@ def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db))
     if not (tipo and regime and estado):
         raise HTTPException(400, "Tipo, regime ou estado inválidos")
 
-    # entidade principal
     emp = models.Empresa(
         codigo=payload.codigo,
         cnpj=payload.cnpj,
@@ -114,23 +110,24 @@ def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db))
         estado_empresa=estado,
     )
     db.add(emp)
-    db.flush()   # garante emp.id
 
-    # telefones
-    for tel in payload.telefones:
-        db.add(models.Telefone(empresa_id=emp.id, **tel.dict()))
-
-    # endereço (remove 'zip' → usa 'cep' no modelo)
-    end_dict = payload.endereco.dict()
-    end_dict.pop("zip", None)
-    db.add(models.Endereco(empresa_id=emp.id, **end_dict))
-
-    # redes sociais
-    _add_redes_sociais(db, emp.id, payload.redes_sociais)
-
-    # commit
     try:
+        db.flush()  # ← agora dentro do try  (captura duplicidade logo aqui)
+
+        # telefones
+        for tel in payload.telefones:
+            db.add(models.Telefone(empresa_id=emp.id, **tel.dict()))
+
+        # endereço
+        end_dict = payload.endereco.dict()
+        end_dict.pop("zip", None)
+        db.add(models.Endereco(empresa_id=emp.id, **end_dict))
+
+        # redes sociais
+        _add_redes_sociais(db, emp.id, payload.redes_sociais)
+
         db.commit()
+
     except IntegrityError as exc:
         db.rollback()
         msg = str(exc.orig)
@@ -144,6 +141,7 @@ def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db))
     return _empresa_to_response(emp)
 
 
+# ───────────────────── rota READ by id ─────────────────
 @app.get("/empresas/{empresa_id}", response_model=schemas.EmpresaResponse)
 def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
     emp = db.query(models.Empresa).get(empresa_id)
@@ -152,12 +150,9 @@ def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
     return _empresa_to_response(emp)
 
 
+# ───────────────────── rota UPDATE ────────────────────
 @app.put("/empresas/{empresa_id}", response_model=schemas.EmpresaResponse)
-def atualizar_empresa(
-    empresa_id: int,
-    payload: schemas.EmpresaUpdate,
-    db: Session = Depends(get_db),
-):
+def atualizar_empresa(empresa_id: int, payload: schemas.EmpresaUpdate, db: Session = Depends(get_db)):
     emp = db.query(models.Empresa).get(empresa_id)
     if not emp:
         raise HTTPException(404, "Empresa não encontrada")
@@ -174,25 +169,40 @@ def atualizar_empresa(
     emp.regime_empresarial = db.query(models.RegimeEmpresarial).filter_by(nome=payload.regime_empresarial).first()
     emp.estado_empresa     = db.query(models.EstadoEmpresa    ).filter_by(nome=payload.estado_empresa    ).first()
 
-    # telefones
-    db.query(models.Telefone).filter_by(empresa_id=empresa_id).delete()
-    for tel in payload.telefones:
-        db.add(models.Telefone(empresa_id=empresa_id, **tel.dict()))
+    try:
+        db.flush()  # valida duplicidade já aqui
 
-    # endereço & redes
-    db.query(models.Endereco  ).filter_by(empresa_id=empresa_id).delete()
-    db.query(models.RedeSocial).filter_by(empresa_id=empresa_id).delete()
+        # telefones
+        db.query(models.Telefone).filter_by(empresa_id=empresa_id).delete()
+        for tel in payload.telefones:
+            db.add(models.Telefone(empresa_id=empresa_id, **tel.dict()))
 
-    end_dict = payload.endereco.dict()
-    end_dict.pop("zip", None)
-    db.add(models.Endereco(empresa_id=empresa_id, **end_dict))
-    _add_redes_sociais(db, empresa_id, payload.redes_sociais)
+        # endereço
+        db.query(models.Endereco).filter_by(empresa_id=empresa_id).delete()
+        end_dict = payload.endereco.dict()
+        end_dict.pop("zip", None)
+        db.add(models.Endereco(empresa_id=empresa_id, **end_dict))
 
-    db.commit()
+        # redes sociais
+        db.query(models.RedeSocial).filter_by(empresa_id=empresa_id).delete()
+        _add_redes_sociais(db, empresa_id, payload.redes_sociais)
+
+        db.commit()
+
+    except IntegrityError as exc:
+        db.rollback()
+        msg = str(exc.orig)
+        if "empresas.codigo" in msg:
+            raise HTTPException(409, "Código já cadastrado")
+        if "empresas.cnpj" in msg:
+            raise HTTPException(409, "CNPJ já cadastrado")
+        raise HTTPException(500, "Erro no banco de dados")
+
     db.refresh(emp)
     return _empresa_to_response(emp)
 
 
+# ───────────────────── rota DELETE ────────────────────
 @app.delete("/empresas/{empresa_id}", response_model=dict)
 def deletar_empresa(empresa_id: int, db: Session = Depends(get_db)):
     if not db.query(models.Empresa).filter_by(id=empresa_id).delete():
@@ -201,10 +211,10 @@ def deletar_empresa(empresa_id: int, db: Session = Depends(get_db)):
     return {"message": "Empresa deletada com sucesso"}
 
 
-# ─────────────────── listagem paginada ──────────────────────
+# ───────────────────── rota LIST (paginação) ──────────
 @app.get("/empresas/", response_model=schemas.PaginatedEmpresas)
 def listar_empresas(
-    skip: int = Query(0,  ge=0),
+    skip:  int = Query(0,  ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
@@ -224,7 +234,7 @@ def listar_empresas(
     )
 
 
-# ───────────────────── look-ups auxiliares ───────────────────
+# ───────────────────── look-ups ───────────────────────
 @app.get("/tipos_empresa/")
 def listar_tipos(db: Session = Depends(get_db)):
     return db.query(models.TipoEmpresa).order_by(models.TipoEmpresa.nome).all()

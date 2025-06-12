@@ -1,12 +1,30 @@
-// -----------------------------------------------------------------------------
-// Todas as chamadas relacionadas à entidade Empresa
-// -----------------------------------------------------------------------------
-import api from "./api";
+// src/services/companyService.js
+import api from "./api";            // ← caminho relativo (não usa mais '@/')
 
-export const CompanyService = {
-    list:   (skip = 0, limit = 20) => api.get(`/empresas/?skip=${skip}&limit=${limit}`),
-    get:    (id)                   => api.get(`/empresas/${id}`),
-    create: (payload)              => api.post("/empresas/", payload),
-    update: (id, payload)          => api.put(`/empresas/${id}`, payload),
-    remove: (id)                   => api.delete(`/empresas/${id}`),
+// 🔹 Cria uma nova empresa ------------------------------------------
+export const createCompany = (payload) => api.post("/empresas/", payload);
+
+// 🔹 Atualiza empresa existente -------------------------------------
+export const updateCompany = (id, payload) =>
+    api.put(`/empresas/${id}`, payload);
+
+// 🔹 Lista empresas (com paginação/opções de filtro) ----------------
+export const listCompanies = (params = {}) =>
+    api.get("/empresas/", { params });
+
+// 🔹 Remove empresa --------------------------------------------------
+export const deleteCompany = (id) => api.delete(`/empresas/${id}`);
+
+/* ------------------------------------------------------------------
+   Export default: permite usar
+     import CompanyService from "../services/companyService";
+   e depois chamar CompanyService.createCompany(), etc.
+------------------------------------------------------------------- */
+const CompanyService = {
+    createCompany,
+    updateCompany,
+    listCompanies,
+    deleteCompany,
 };
+
+export default CompanyService;

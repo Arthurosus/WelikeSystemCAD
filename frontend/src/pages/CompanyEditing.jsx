@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import HeaderActions from "../components/HeaderActions";
 import CompanyForm from "../components/CompanyForm";
-import { CompanyService } from "../services/companyService";
+import CompanyService from "../services/companyService";
 
 export default function CompanyEditing() {
   const { id } = useParams();

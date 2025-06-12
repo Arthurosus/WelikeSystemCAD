@@ -9,7 +9,7 @@ import Sidebar        from "../components/Sidebar";
 import HeaderActions  from "../components/HeaderActions";
 import DetailModal    from "../components/DetailModal";
 
-import { CompanyService } from "../services/companyService";
+import CompanyService from "../services/companyService";
 import "../styles/companyRegistration.css";
 
 // ─────────── configuração ───────────
