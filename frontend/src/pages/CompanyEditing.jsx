@@ -1,38 +1,58 @@
+/* eslint-disable react/prop-types */
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import HeaderActions from "../components/HeaderActions";
-import CompanyForm from "../components/CompanyForm";
+import { useParams, useNavigate }     from "react-router-dom";
+
+import Sidebar        from "../components/Sidebar";
+import HeaderActions  from "../components/HeaderActions";
+import CompanyForm    from "../components/CompanyForm";
+
 import CompanyService from "../services/companyService";
 
 export default function CompanyEditing() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [cadastroAberto, setCadastroAberto] = useState(false);
-  const [empresa, setEmpresa] = useState(null);
+  const { id }                 = useParams();
+  const navigate               = useNavigate();
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [empresa,      setEmpresa]    = useState(null);
+
+  /* carrega dados da empresa uma única vez ------------------------ */
   useEffect(() => {
     (async () => {
-      const { data } = await CompanyService.get(id);
-      setEmpresa(data);
+      try {
+        const { data } = await CompanyService.getCompany(id);
+        setEmpresa(data);
+      } catch (err) {
+        console.error("Erro ao buscar empresa:", err);
+        navigate("/empresas");
+      }
     })();
-  }, [id]);
+  }, [id, navigate]);
 
+  /* submit edit --------------------------------------------------- */
   const handleUpdate = async (payload) => {
-    await CompanyService.update(id, payload);
+    await CompanyService.updateCompany(id, payload);
     navigate("/empresas");
   };
 
-  if (!empresa) return null; // spinner opcional
+  if (!empresa) return null; /* ou <Spinner/> */
 
   return (
       <div className="main-layout">
-        <Sidebar cadastroAberto={cadastroAberto} setCadastroAberto={setCadastroAberto} />
+        <Sidebar
+            cadastroAberto={sidebarOpen}
+            setCadastroAberto={setSidebarOpen}
+        />
+
         <div className="content">
           <HeaderActions categoria="empresas" />
           <div className="header-bar" />
+
           <div className="registration-container">
-            <CompanyForm mode="edit" initialData={empresa} onSubmit={handleUpdate} />
+            <CompanyForm
+                mode="edit"
+                initialData={empresa}
+                onSubmit={handleUpdate}
+            />
           </div>
         </div>
       </div>

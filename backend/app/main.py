@@ -56,7 +56,7 @@ def _empresa_to_response(e: models.Empresa) -> schemas.EmpresaResponse:
         id=e.id,
         codigo=e.codigo,
         sigla=e.sigla,
-        razao_social=e.razao_social,    
+        razao_social=e.razao_social,
         cnpj=e.cnpj,
         nome_fantasia=e.nome_fantasia,
         nome_site=e.nome_site,
