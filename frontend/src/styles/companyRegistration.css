@@ -607,3 +607,85 @@ td.actions-cell {
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
+/* === ajustes 2024-06 – telefone + checkbox “Exibir no site” =============== */
+
+/* ▶ telefones ------------------------------------------------------------- */
+.telefone-inputs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.telefone-inputs select,
+.telefone-inputs input[type="text"],
+.telefone-inputs label {
+  height: 44px;                 /* altura igual para todos os campos  */
+}
+
+.telefone-inputs input[type="text"] {
+  min-width: 180px;
+  padding: 0.5rem 0.75rem;
+  background: #f2f5f9;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.telefone-inputs label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.telefone-group + .add-btn {        /* botão “Adicionar novo telefone”  */
+  margin-top: 0.6rem;
+}
+
+/* ▶ checkbox “Exibir dados da empresa no site público” ------------------- */
+.checkbox-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0.8rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.checkbox-line input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #004c97;          /* mesma cor dos botões principais   */
+}
+/* -------------- PATCH 24-Jun – acabamento final ----------------- */
+
+/* faz o checkbox “Exibir dados…” ocupar a linha inteira da grade */
+.checkbox-line{
+  grid-column: 1 / -1;           /* começa na 1ª coluna, termina na última  */
+}
+
+/* idem para o bloco de telefones (fica alinhado à esquerda sem quebrar) */
+.telefone-group{
+  grid-column: 1 / -1;
+}
+
+/* corrige distorção no <select> e no campo de número dentro da grade   */
+.telefone-inputs select{
+  flex: 0 0 115px;               /* largura fixa, não cresce               */
+}
+.telefone-inputs input[type="text"]{
+  flex: 1 1 auto;                /* cresce e ocupa o resto                 */
+}
+
+/* remove o sublinhado azul (Safari/Chrome) dos botões de ação           */
+.btn:focus-visible{
+  outline: 2px solid transparent;
+}
+
+/* Opcional – deixa o “Adicionar novo telefone” esteticamente igual aos
+   botões principais, mas em 100 % da largura para não “pular” na grade  */
+.add-btn{
+  width: 100%;
+  text-align: center;
+}
