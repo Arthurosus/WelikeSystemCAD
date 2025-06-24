@@ -1,46 +1,47 @@
+// src/components/HeaderActions.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ROUTES }      from "../routes";
 
 const HeaderActions = ({ categoria }) => {
     const navigate = useNavigate();
 
     const actions = {
         pessoas: [
-            { label: "Novo Cadastro", onClick: () => navigate(ROUTES.PERSON_NEW) },
-            { label: "Listar Pessoas", onClick: () => navigate(ROUTES.PERSON_LIST) },
+            { label: "Novo Cadastro", onClick: () => navigate("/cadastro-pessoas") },
+            { label: "Listar Pessoas", onClick: () => navigate("/lista-pessoas") },
         ],
         empresas: [
-            { label: "Nova Empresa",   onClick: () => navigate(ROUTES.EMP_NEW)  },
-            { label: "Listar Empresas",onClick: () => navigate(ROUTES.EMP_LIST) },
+            { label: "Nova Empresa", onClick: () => navigate("/cadastro-empresas") },
+            { label: "Listar Empresas", onClick: () => navigate("/lista-empresas")  },
+
         ],
         alunos: [
-            { label: "Novo Aluno",     onClick: () => navigate(ROUTES.STUD_NEW)  },
-            { label: "Alunos Cadastrados", onClick: () => navigate(ROUTES.STUD_LIST) },
+            { label: "Novo Aluno", onClick: () => navigate("/cadastro-aluno") },
+            { label: "Alunos Cadastrados", onClick: () => navigate("/lista-alunos") },
         ],
         cargos: [
-            { label: "Novo Cargo",     onClick: () => navigate(ROUTES.ROLE_NEW)  },
-            { label: "Listar Cargos",  onClick: () => navigate(ROUTES.ROLE_LIST) },
+            { label: "Novo Cargo", onClick: () => navigate("/cadastro-cargos") },
+            { label: "Listar Cargos", onClick: () => navigate("/lista-cargos") },
         ],
         salas: [
-            { label: "Nova Sala de Aula", onClick: () => navigate(ROUTES.ROOM_NEW) },
-            { label: "Listar Salas",      onClick: () => navigate(ROUTES.ROOM_LIST) },
+            { label: "Nova Sala de Aula", onClick: () => navigate("/cadastro-salas") },
+            { label: "Listar Salas", onClick: () => navigate("/lista-salas") },
         ],
         funcionarios: [
-            { label: "Novo Funcionário",     onClick: () => navigate(ROUTES.EMPLOYEE_NEW) },
-            { label: "Funcionários Cadastrados", onClick: () => navigate(ROUTES.EMPLOYEE_LIST) },
+            { label: "Novo Funcionário", onClick: () => navigate("/cadastro-funcionario") },
+            { label: "Funcionários Cadastrados", onClick: () => navigate("/lista-funcionarios") },
         ],
         aulas: [
-            { label: "Nova Aula",       onClick: () => navigate(ROUTES.LESSON_NEW)  },
-            { label: "Aulas Cadastradas",onClick: () => navigate(ROUTES.LESSON_LIST) },
+            { label: "Nova Aula", onClick: () => navigate("/cadastro-aula") },
+            { label: "Aulas Cadastradas", onClick: () => navigate("/lista-aulas") },
         ],
     };
 
     return (
         <div className="header-actions">
-            {actions[categoria]?.map((a, idx) => (
-                <button key={idx} className="btn header-btn" onClick={a.onClick}>
-                    {a.label}
+            {actions[categoria]?.map((action, index) => (
+                <button key={index} className="btn header-btn" onClick={action.onClick}>
+                    {action.label}
                 </button>
             ))}
         </div>
