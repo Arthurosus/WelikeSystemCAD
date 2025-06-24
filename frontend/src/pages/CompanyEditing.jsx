@@ -15,7 +15,6 @@ export default function CompanyEditing() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [empresa,      setEmpresa]    = useState(null);
 
-  /* carrega dados da empresa uma única vez ------------------------ */
   useEffect(() => {
     (async () => {
       try {
@@ -28,7 +27,6 @@ export default function CompanyEditing() {
     })();
   }, [id, navigate]);
 
-  /* submit edit --------------------------------------------------- */
   const handleUpdate = async (payload) => {
     await CompanyService.updateCompany(id, payload);
     navigate("/empresas");

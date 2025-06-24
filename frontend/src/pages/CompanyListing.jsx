@@ -1,6 +1,4 @@
-// ─────────────────────────────────────────────────────────────
-//  CompanyListing – listagem, paginação e react-query
-// ─────────────────────────────────────────────────────────────
+
 import React, { useState, useMemo } from "react";
 import { useNavigate }              from "react-router-dom";
 import {
@@ -16,17 +14,14 @@ import DetailModal    from "../components/DetailModal";
 import CompanyService from "../services/companyService";
 import "../styles/companyRegistration.css";
 
-/* ─────────── configuração ─────────── */
 const ADMIN_PWD  = "sasa0309";
 const PAGE_LIMIT = 10;           // empresas por página
 
 export default function CompanyListing() {
-  /* 1. estado local ------------------------------------------------ */
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search,      setSearch]      = useState("");
   const [page,        setPage]        = useState(1);
 
-  /* detalhe & exclusão -------------------------------------------- */
   const [detailItem,  setDetailItem]  = useState(null);
   const [deleteId,    setDeleteId]    = useState(null);
   const [deletePwd,   setDeletePwd]   = useState("");
@@ -34,7 +29,6 @@ export default function CompanyListing() {
   const navigate     = useNavigate();
   const queryClient  = useQueryClient();
 
-  /* 2. lista paginada --------------------------------------------- */
   const { data, isLoading, isError } = useQuery(
       ["companies", page, search],
       () =>
@@ -46,7 +40,6 @@ export default function CompanyListing() {
       { keepPreviousData: true },
   );
 
-  /* 3. exclusão ---------------------------------------------------- */
   const deleteMutation = useMutation(
       (id) => CompanyService.remove(id),
       {
@@ -57,7 +50,6 @@ export default function CompanyListing() {
       },
   );
 
-  /* 4. helpers ----------------------------------------------------- */
   const total       = data?.total  ?? 0;
   const pagesCount  = Math.ceil(total / PAGE_LIMIT);
   const empresas    = data?.items  ?? [];
@@ -67,7 +59,6 @@ export default function CompanyListing() {
       [pagesCount],
   );
 
-  /* 5. actions ----------------------------------------------------- */
   const handleDelete = () => {
     if (deletePwd !== ADMIN_PWD) {
       alert("Senha incorreta");
@@ -78,7 +69,6 @@ export default function CompanyListing() {
 
   const handleEdit = (id) => navigate(`/editar-empresa/${id}`);
 
-  /* 6. render ------------------------------------------------------ */
   return (
       <div className="main-layout">
         <Sidebar
@@ -263,7 +253,6 @@ export default function CompanyListing() {
   );
 }
 
-/* ——— estilos simples ——— */
 const th       = { padding: "10px", textAlign: "left", fontWeight: 600, borderBottom: "2px solid #c9e2ff" };
 const thCenter = { ...th, textAlign: "center", width: 140 };
 const td       = { padding: "8px 10px", borderBottom: "1px solid #e0e0e0", fontSize: "0.95rem" };
