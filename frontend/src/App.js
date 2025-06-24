@@ -2,74 +2,77 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-import CompanyRegistration  from "./pages/CompanyRegistration";
-import PersonRegistration   from "./pages/PersonRegistration";
-import RoleRegistration     from "./pages/RoleRegistration";
-import RoomRegistration     from "./pages/RoomRegistration";
-import StudentRegistration  from "./pages/StudentRegistration";
-import StudentEditing  from "./pages/StudentEditing";
-import StudentListing from "./pages/StudentListing";
-import EmployeeEditing from "./pages/EmployeeEditing";
-import EmployeeRegistration from "./pages/EmployeeRegistration";
-import EmployeeListing from "./pages/EmployeeListing";
-import LessonRegistration   from "./pages/LessonRegistration";
-import CompanyListing       from "./pages/CompanyListing";
-import PersonListing        from "./pages/PersonListing";
-import CompanyEditing       from "./pages/CompanyEditing";
-import PersonEditing from "./pages/PersonEditing";
-import RoleEditing from "./pages/RoleEditing";
-import RoleListing from "./pages/RoleListing";
-import RoomEditing from "./pages/RoomEditing";
-import RoomListing from "./pages/RoomListing";
-import LessonEditing from "./pages/LessonEditing";
-import LessonListing from "./pages/LessonListing";
-import WelcomePage from "./pages/WelcomePage";
+import CompanyRegistration   from "./pages/CompanyRegistration";
+import PersonRegistration    from "./pages/PersonRegistration";
+import RoleRegistration      from "./pages/RoleRegistration";
+import RoomRegistration      from "./pages/RoomRegistration";
+import StudentRegistration   from "./pages/StudentRegistration";
+import EmployeeRegistration  from "./pages/EmployeeRegistration";
+import LessonRegistration    from "./pages/LessonRegistration";
 
+import CompanyListing        from "./pages/CompanyListing";
+import PersonListing         from "./pages/PersonListing";
+import RoleListing           from "./pages/RoleListing";
+import RoomListing           from "./pages/RoomListing";
+import StudentListing        from "./pages/StudentListing";
+import EmployeeListing       from "./pages/EmployeeListing";
+import LessonListing         from "./pages/LessonListing";
 
+import CompanyEditing        from "./pages/CompanyEditing";
+import PersonEditing         from "./pages/PersonEditing";
+import RoleEditing           from "./pages/RoleEditing";
+import RoomEditing           from "./pages/RoomEditing";
+import StudentEditing        from "./pages/StudentEditing";
+import EmployeeEditing       from "./pages/EmployeeEditing";
+import LessonEditing         from "./pages/LessonEditing";
 
+import WelcomePage           from "./pages/WelcomePage";
 
-function App() {
+import { ROUTES } from "./routes";
+
+export default function App() {
   return (
       <Router>
         <Routes>
-          {/* rota padrão */}
-          <Route path="/"   element={<Navigate to="/welcome" replace />} />
+          {/* landing */}
+          <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
+          <Route path={ROUTES.HOME} element={<WelcomePage />} />
 
-          {/* Página Inicial */}
-          <Route path="/welcome"   element={<WelcomePage />} />
+          {/* ─── Empresas ─────────────────────────────────────────── */}
+          <Route path={ROUTES.EMP_LIST} element={<CompanyListing />} />
+          <Route path={ROUTES.EMP_NEW}  element={<CompanyRegistration />} />
+          <Route path={ROUTES.EMP_EDIT} element={<CompanyEditing />} />
 
-          {/* cadastros */}
-          <Route path="/cadastro-empresas"    element={<CompanyRegistration />} />
-          <Route path="/cadastro-pessoas"     element={<PersonRegistration />} />
-          <Route path="/cadastro-cargos"      element={<RoleRegistration />} />
-          <Route path="/cadastro-salas"       element={<RoomRegistration />} />
-          <Route path="/cadastro-aluno"       element={<StudentRegistration />} />
-          <Route path="/cadastro-funcionario" element={<EmployeeRegistration />} />
-          <Route path="/cadastro-aula"        element={<LessonRegistration />} />
+          {/* ─── Pessoas ──────────────────────────────────────────── */}
+          <Route path={ROUTES.PESS_LIST} element={<PersonListing />} />
+          <Route path={ROUTES.PESS_NEW}  element={<PersonRegistration />} />
+          <Route path={ROUTES.PESS_EDIT} element={<PersonEditing />} />
 
-          {/* listagens */}
-          <Route path="/lista-empresas" element={<CompanyListing />} />
-          <Route path="/lista-pessoas"  element={<PersonListing />} />
-          <Route path="/lista-cargos" element={<RoleListing />} />
-          <Route path="/lista-salas" element={<RoomListing />} />
-          <Route path="/lista-alunos" element={<StudentListing />} />
-          <Route path="/lista-funcionarios" element={<EmployeeListing />} />
-          <Route path="/lista-aulas" element={<LessonListing />} />
+          {/* ─── Cargos ───────────────────────────────────────────── */}
+          <Route path={ROUTES.ROLE_LIST} element={<RoleListing />} />
+          <Route path={ROUTES.ROLE_NEW}  element={<RoleRegistration />} />
+          <Route path={ROUTES.ROLE_EDIT} element={<RoleEditing />} />
 
+          {/* ─── Salas ────────────────────────────────────────────── */}
+          <Route path={ROUTES.ROOM_LIST} element={<RoomListing />} />
+          <Route path={ROUTES.ROOM_NEW}  element={<RoomRegistration />} />
+          <Route path={ROUTES.ROOM_EDIT} element={<RoomEditing />} />
 
+          {/* ─── Alunos ───────────────────────────────────────────── */}
+          <Route path={ROUTES.ALUNO_LIST} element={<StudentListing />} />
+          <Route path={ROUTES.ALUNO_NEW}  element={<StudentRegistration />} />
+          <Route path={ROUTES.ALUNO_EDIT} element={<StudentEditing />} />
 
-          {/* >>> edição :id <<< */}
-          <Route path="/editar-empresa/:id" element={<CompanyEditing />} />
-          <Route path="/editar-pessoa/:id" element={<PersonEditing />} />
-          <Route path="/editar-cargo/:id" element={<RoleEditing />} />
-          <Route path="/editar-sala/:id" element={<RoomEditing />} />
-          <Route path="/editar-aluno/:id" element={<StudentEditing />}   />
-          <Route path="/editar-funcionario/:id" element={<EmployeeEditing />}   />
-          <Route path="/editar-aula/:id" element={<LessonEditing />}   />
+          {/* ─── Funcionários ─────────────────────────────────────── */}
+          <Route path={ROUTES.FUNC_LIST} element={<EmployeeListing />} />
+          <Route path={ROUTES.FUNC_NEW}  element={<EmployeeRegistration />} />
+          <Route path={ROUTES.FUNC_EDIT} element={<EmployeeEditing />} />
 
+          {/* ─── Aulas ────────────────────────────────────────────── */}
+          <Route path={ROUTES.LESSON_LIST} element={<LessonListing />} />
+          <Route path={ROUTES.LESSON_NEW}  element={<LessonRegistration />} />
+          <Route path={ROUTES.LESSON_EDIT} element={<LessonEditing />} />
         </Routes>
       </Router>
   );
 }
-
-export default App;
