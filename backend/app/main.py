@@ -1,12 +1,5 @@
-"""
-API REST de Empresas – CRUD + paginação.
-Corrige:
-• flush dentro do try/except  → devolve 409 (duplicado) em vez de 500
-• tratamento de redes sociais
-• CORS para http://localhost:3000
-"""
 
-from typing import List
+from typing import List, Dict, Any
 
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +11,7 @@ from app import models
 from app.schemas import company as schemas
 
 
-# ─────────────── inicialização + CORS ────────────────
+# ───────────── inicialização + CORS ─────────────
 models.Base.metadata.create_all(bind=engine_central)
 
 app = FastAPI(title="WelikeSystemCAD – API")
@@ -32,7 +25,7 @@ app.add_middleware(
 )
 
 
-# ─────────────── dependência de sessão ───────────────
+# ───────────── dependência de sessão ─────────────
 def get_db():
     db = SessionLocal()
     try:
@@ -41,7 +34,7 @@ def get_db():
         db.close()
 
 
-# ──────────────── helpers internos ───────────────────
+# ─────────────── helpers internos ────────────────
 def _tel_to_schema(t: models.Telefone) -> schemas.TelefoneBase:
     return schemas.TelefoneBase(
         codigo_pais=t.codigo_pais or "+55",
@@ -49,6 +42,13 @@ def _tel_to_schema(t: models.Telefone) -> schemas.TelefoneBase:
         principal=t.principal,
         whatsapp=t.whatsapp,
     )
+
+
+def _redes_to_dict(rs: List[models.RedeSocial]) -> Dict[str, str] | None:
+    """Converte linhas da tabela em dict {tipo: link}."""
+    if not rs:
+        return None
+    return {row.tipo: row.link for row in rs if row.link}
 
 
 def _empresa_to_response(e: models.Empresa) -> schemas.EmpresaResponse:
@@ -68,13 +68,13 @@ def _empresa_to_response(e: models.Empresa) -> schemas.EmpresaResponse:
         estado_empresa=e.estado_empresa.nome,
         telefones=[_tel_to_schema(t) for t in e.telefones],
         endereco=e.endereco.__dict__ if e.endereco else None,
-        redes_sociais=e.redes_sociais.__dict__ if e.redes_sociais else None,
+        redes_sociais=_redes_to_dict(e.redes_sociais),
     )
 
 
 def _add_redes_sociais(db: Session, empresa_id: int, rs: schemas.RedesSociaisBase) -> None:
     """Grava 0-N linhas na tabela `redes_sociais`."""
-    for campo, valor in rs.dict().items():
+    for campo, valor in rs.dict(exclude_none=True).items():
         if valor:
             db.add(
                 models.RedeSocial(
@@ -112,7 +112,7 @@ def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db))
     db.add(emp)
 
     try:
-        db.flush()  # ← agora dentro do try  (captura duplicidade logo aqui)
+        db.flush()   # ← capta duplicidades
 
         # telefones
         for tel in payload.telefones:
@@ -141,10 +141,10 @@ def criar_empresa(payload: schemas.EmpresaCreate, db: Session = Depends(get_db))
     return _empresa_to_response(emp)
 
 
-# ───────────────────── rota READ by id ─────────────────
+# ───────────────────── rota READ by id ────────────────
 @app.get("/empresas/{empresa_id}", response_model=schemas.EmpresaResponse)
 def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
-    emp = db.query(models.Empresa).get(empresa_id)
+    emp = db.get(models.Empresa, empresa_id)
     if not emp:
         raise HTTPException(404, "Empresa não encontrada")
     return _empresa_to_response(emp)
@@ -153,7 +153,7 @@ def obter_empresa(empresa_id: int, db: Session = Depends(get_db)):
 # ───────────────────── rota UPDATE ────────────────────
 @app.put("/empresas/{empresa_id}", response_model=schemas.EmpresaResponse)
 def atualizar_empresa(empresa_id: int, payload: schemas.EmpresaUpdate, db: Session = Depends(get_db)):
-    emp = db.query(models.Empresa).get(empresa_id)
+    emp = db.get(models.Empresa, empresa_id)
     if not emp:
         raise HTTPException(404, "Empresa não encontrada")
 
@@ -170,15 +170,15 @@ def atualizar_empresa(empresa_id: int, payload: schemas.EmpresaUpdate, db: Sessi
     emp.estado_empresa     = db.query(models.EstadoEmpresa    ).filter_by(nome=payload.estado_empresa    ).first()
 
     try:
-        db.flush()  # valida duplicidade já aqui
+        db.flush()   # valida duplicidade
 
         # telefones
-        db.query(models.Telefone).filter_by(empresa_id=empresa_id).delete()
+        db.query(models.Telefone ).filter_by(empresa_id=empresa_id).delete()
         for tel in payload.telefones:
             db.add(models.Telefone(empresa_id=empresa_id, **tel.dict()))
 
         # endereço
-        db.query(models.Endereco).filter_by(empresa_id=empresa_id).delete()
+        db.query(models.Endereco ).filter_by(empresa_id=empresa_id).delete()
         end_dict = payload.endereco.dict()
         end_dict.pop("zip", None)
         db.add(models.Endereco(empresa_id=empresa_id, **end_dict))
@@ -202,30 +202,43 @@ def atualizar_empresa(empresa_id: int, payload: schemas.EmpresaUpdate, db: Sessi
     return _empresa_to_response(emp)
 
 
-# ───────────────────── rota DELETE ────────────────────
+# ───────────────────── rota DELETE ───────────────────
 @app.delete("/empresas/{empresa_id}", response_model=dict)
 def deletar_empresa(empresa_id: int, db: Session = Depends(get_db)):
-    if not db.query(models.Empresa).filter_by(id=empresa_id).delete():
+    emp = db.get(models.Empresa, empresa_id)
+    if not emp:
         raise HTTPException(404, "Empresa não encontrada")
+
+    db.delete(emp)          # ON DELETE CASCADE cuida dos filhos
     db.commit()
     return {"message": "Empresa deletada com sucesso"}
 
 
-# ───────────────────── rota LIST (paginação) ──────────
+# ───────────────────── rota LIST (pag) ───────────────
 @app.get("/empresas/", response_model=schemas.PaginatedEmpresas)
 def listar_empresas(
     skip:  int = Query(0,  ge=0),
     limit: int = Query(20, ge=1, le=100),
+    q: str | None = Query(None, description="Busca por razão social / fantasia / CNPJ"),
     db: Session = Depends(get_db),
 ):
-    total = db.query(models.Empresa).count()
+    query = db.query(models.Empresa)
+    if q:
+        like = f"%{q}%"
+        query = query.filter(
+            models.Empresa.razao_social.ilike(like) |
+            models.Empresa.nome_fantasia.ilike(like) |
+            models.Empresa.cnpj.ilike(like)
+        )
+
+    total = query.count()
     rows: List[models.Empresa] = (
-        db.query(models.Empresa)
-        .order_by(models.Empresa.razao_social)
-        .offset(skip)
-        .limit(limit)
-        .all()
+        query.order_by(models.Empresa.razao_social)
+             .offset(skip)
+             .limit(limit)
+             .all()
     )
+
     return schemas.PaginatedEmpresas(
         total=total,
         skip=skip,
@@ -234,7 +247,7 @@ def listar_empresas(
     )
 
 
-# ───────────────────── look-ups ───────────────────────
+# ───────────────────── look-ups simples ──────────────
 @app.get("/tipos_empresa/")
 def listar_tipos(db: Session = Depends(get_db)):
     return db.query(models.TipoEmpresa).order_by(models.TipoEmpresa.nome).all()
